@@ -10,7 +10,7 @@ document.querySelector('#user-form').addEventListener('submit', function (e) {
 
 	const email = {
 		node: jQuery('[name="email"]'),
-		regExp: /^[a-z0-9-]+\.*[a-z0-9-]+@[a-z0-9-]+.[a-z0-9.-]+[a-z0-9-]+$/
+		regExp: /^([^.@]+)+(\.[^.@]+)*@([^.@]+\.)+([^.@]+)$/
 	};
 
 	const password = {
@@ -30,6 +30,15 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 	button.addEventListener('click', function (e) {
 		document.querySelector('#description').classList.add('d-none');
 		document.querySelector('#preview').classList.add('d-none');
+
+		if (!$(e.currentTarget).hasClass('active')) {
+			$(e.currentTarget)
+				.addClass('active')
+				.siblings(
+					$(e.currentTarget).hasClass('active')
+				)
+				.removeClass('active')
+		}
 
 		document.querySelector('#' + e.currentTarget.getAttribute('data-show')).classList.remove('d-none');
 	});
