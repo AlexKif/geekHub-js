@@ -10,7 +10,7 @@ document.querySelector('#user-form').addEventListener('submit', function (e) {
 
 	const email = {
 		node: jQuery('[name="email"]'),
-		regExp: /^([^.@]+)+(\.[^.@]+)*@([^.@]+\.)+([^.@]+)$/
+		regExp: /^([a-zA-Z0-9]|(?!\.)[a-zA-Z0-9-.]{1,}[a-zA-Z0-9-])@([a-zA-Z0-9-]+[.]+[a-zA-Z0-9-]+)+$/
 	};
 
 	const password = {
