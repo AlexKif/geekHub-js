@@ -1,11 +1,7 @@
 jQuery('input').on('paste', function (e) {
 	e.preventDefault();
 
-	jQuery('thead tr th').each(function (index, element) {
-		if (index > 2) {
-			jQuery(element).remove()
-		}
-	})
+	resetTable()
 
 	let arrEn = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 	var text = e.originalEvent.clipboardData.getData('text/plain');
@@ -45,7 +41,6 @@ jQuery('input').on('paste', function (e) {
 });
 
 function createTableRows(data, initialInput, columns) {
-	console.log(data)
 	let arrEn = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 	let initialRow = 3;
 	let rows = data.length - jQuery(initialInput).closest('tbody').find('tr').length;
@@ -89,15 +84,38 @@ function createTableRows(data, initialInput, columns) {
 	jQuery(jQuery(initialInput).closest('tbody')).find('tr').each((itemIndex, item) => {
 		if (itemIndex >= rowIndex) {
 			jQuery(item).find('td').each(function (elementIndex, element) {
+				jQuery(element).find('input').attr('name', `${arrEn[elementIndex]}${itemIndex + 1}`)
 				if (elementIndex >= columnIndex) {
 					jQuery(element).find('input').val(data[dataRowIncrement][dataColumnIncrement])
 					dataColumnIncrement++
-					if (dataColumnIncrement === 3) {
+					if (dataColumnIncrement === data[0].length) {
 						dataColumnIncrement = 0
 					}
 				}
 			})
 			dataRowIncrement++
+		}
+	})
+}
+
+function resetTable() {
+	jQuery('thead tr th').each(function (index, element) {
+		if (index > 2) {
+			jQuery(element).remove()
+		}
+	})
+
+	jQuery('tbody tr').each(function (index, item) {
+		jQuery(item).find('input').val('')
+		if (index < 2) {
+			jQuery(item).find('td').each(function (tdIndex, tdItem) {
+				if (tdIndex > 1) {
+					jQuery(tdItem).remove()
+				}
+			})
+		}
+		if (index > 1) {
+			jQuery(item).remove()
 		}
 	})
 }
