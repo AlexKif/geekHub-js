@@ -123,7 +123,7 @@ function resetTable() {
 
 var currentColumn;
 
-jQuery('thead th').on('contextmenu', function (e) {
+jQuery('thead th').not(':first').on('contextmenu', function (e) {
 	e.preventDefault();
 
 	currentColumn = e.currentTarget;
