@@ -84,7 +84,6 @@ function createTableRows(data, initialInput, columns) {
 	jQuery(jQuery(initialInput).closest('tbody')).find('tr').each((itemIndex, item) => {
 		if (itemIndex >= rowIndex) {
 			jQuery(item).find('td').each(function (elementIndex, element) {
-				jQuery(element).find('input').attr('name', `${arrEn[elementIndex]}${itemIndex + 1}`)
 				if (elementIndex >= columnIndex) {
 					jQuery(element).find('input').val(data[dataRowIncrement][dataColumnIncrement])
 					dataColumnIncrement++
@@ -95,7 +94,10 @@ function createTableRows(data, initialInput, columns) {
 			})
 			dataRowIncrement++
 		}
-	})
+		jQuery(item).find('td').each(function (elementIndex, element) {
+			jQuery(element).find('input').attr('name', `${arrEn[elementIndex]}${itemIndex + 1}`)
+		})
+		})
 }
 
 function resetTable() {
