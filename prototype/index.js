@@ -79,20 +79,20 @@ Csv.prototype.parse = function (string, separator) {
 
 Csv.prototype.generate = function (array, separator) {
   this.array = array;
-  this.separator = separator;
+  this.sep = separator;
 
-  let str = '';
+  let result = '';
 
-  if (!separator) {
-    array.forEach(firstArr => {
-      str += firstArr.join(',') + '\n'
+  if (!this.sep) {
+    this.array.forEach(arr => {
+      result += arr.join(',') + '\n'
     })
   } else {
-    array.forEach(firstArr => {
-      str += firstArr.join(separator) + '\n'
+    this.array.forEach(arr => {
+      result += arr.join(separator) + '\n'
     })
   }
 
-  return str;
+  return result;
 }
 
