@@ -1,55 +1,98 @@
-function Csv() {
-  // this.parse = function (string, separator) {
-  //   console.log(string, separator)
-  // }
-}
+function Csv() {}
 
+const str = "Lorem Ipsum - це те;кст-\"риб;а\", що ви;користовується в \n" +
+  "друкарстві т;а дизайні. ;Lorem Ip;sum є, факти\n" +
+  "чно, станд;артною; \"рибою\" аж з XVI; сторіччя, коли не";
 
-const str = "Євпак, Вік\tтор Ми,колай,ович;Ф,ОП;1985;Євпак, ВікторМик,олайович;ФОП;1985\n" +
-            "Бондаренко\tАнатолій Васил,ьович;міський, голова;1974;Бондаренко Анатолій\tВасильо,вич;міський голова;1974\n" +
-            "Мойсієнко\tВасиль, Миколайов\tич;перший, проректор;1965;Мойсієнко\tВасиль, Миколайови\tч;перший, проректор;1965";
+const str2 = "Євпак, Вік\tтор Ми,колай,ов\tич;Ф,ОП;1985;Євпак, Віктор\tМик,олай\tовичФОП;1985\n" +
+  "Бондаренко\tАнатолій Васил,ьович\t;міський, голова;1974;Бон\tдаренко Анатолій\tВасильо,вич;міський голова;1974\n" +
+  "Мойсієнко\tВасиль, Миколайов\tич;перший, проректор;1965;Мойсієнко\tВасиль, Миколайови\tч;перший, проректор;1965";
+
+const str3 = [
+  [
+    "Lorem Ip" ,
+    "sum - це текст-\"ри" ,
+    "ба\", що викори" ,
+    "стовується в "
+  ] ,
+  [
+    "друкарстві та" ,
+    " дизайні. Lorem Ipsu" ,
+    "m є, фактично, с" ,
+    "тандартною \"рибою\""
+  ] ,
+  [
+    " аж з XVI сторіччя, " ,
+    "коли нев" ,
+    "ідомий" ,
+    " друкар взяв шри"
+  ]
+]
 
 Csv.prototype.parse = function (string, separator) {
   this.string = string;
   this.separator = separator;
 
-  const separators = [/,/g, /;/g, /\t/g];
-  let selectedSeparator;
-  const names = ['coma', 'semicolon', 'tab'];
   const strings = this.string.split('\n');
-  const coincidences = strings.map(str => {
-    return separators.map((separator, index) => {
-      return {[names[index]]: str.match(separator).length}
+
+  if (!this.separator) {
+    const separators = [/,/g, /;/g, /\t/g];
+    const keys = ['coma', 'semicolon', 'tab'];
+    let selectedSeparator;
+    let filteredCoincidences = {};
+
+    const coincidences = strings.map(str => {
+      return separators.map((separator, index) => {
+        return {key: keys[index], value: str.match(separator) ? str.match(separator).length: 0}
+      });
     });
-  });
 
-  // const sortedCoincidences = coincidences.map(row => {
-  //   // console.log(row)
-  //   return row.map((separator, index) => {
-  //     console.log(separator)
-  //     // const propName = Object.getOwnPropertyNames(separator)[0];
-  //     // if (names[index] === propName) {
-  //     //   return separator
-  //     // }
-  //     // console.log(separator[names[index]])
-  //     // if (separator[index] === ) {
-  //     //   return
-  //     // }
-  //   })
-  // })
-
-  const sortedCoincidences = coincidences.map(row => {
-    row.forEach((separator, index) => {
-      console.log(separator)
+    coincidences.forEach(row => {
+      row.forEach(separator => {
+        if (Object.keys(filteredCoincidences).includes(separator.key)) {
+          filteredCoincidences = {...filteredCoincidences, [separator.key]: [...filteredCoincidences[separator.key], separator.value]}
+        } else {
+          filteredCoincidences = {...filteredCoincidences, [separator.key]: [separator.value]}
+        }
+      })
     })
-  })
 
+    for (let key in filteredCoincidences) {
+      filteredCoincidences[key].every(element => {
+        return element === filteredCoincidences[key][0] && element !== 0
+      }) ? selectedSeparator = key: null;
+    }
 
+    switch (selectedSeparator) {
+      case 'coma':
+        return strings.map(str => str.split(','))
+      case 'semicolon':
+        return strings.map(str => str.split(';'))
+      case 'tab':
+        return strings.map(str => str.split('\t'))
+    }
 
-  // console.log(sortedCoincidences)
+  } else {
+    return strings.map(str => str.split(this.separator))
+  }
 }
 
-const test = new Csv();
+Csv.prototype.generate = function (array, separator) {
+  this.array = array;
+  this.separator = separator;
 
-const result = test.parse(str);
+  let str = '';
+
+  if (!separator) {
+    array.forEach(firstArr => {
+      str += firstArr.join(',') + '\n'
+    })
+  } else {
+    array.forEach(firstArr => {
+      str += firstArr.join(separator) + '\n'
+    })
+  }
+
+  return str;
+}
 
