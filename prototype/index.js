@@ -10,22 +10,22 @@ const str2 = "Євпак, Вік\tтор Ми,колай,ов\tич;Ф,ОП;1985
 
 const str3 = [
   [
-    "Lorem Ip" ,
-    "sum - це текст-\"ри" ,
-    "ба\", що викори" ,
-    "стовується в "
-  ] ,
+    "Lorem Ipsu",
+    "m - це тек",
+    "ст-\"р",
+    "иба\" що використовує"
+  ],
   [
-    "друкарстві та" ,
-    " дизайні. Lorem Ipsu" ,
-    "m є, фактично, с" ,
-    "тандартною \"рибою\""
-  ] ,
+    "ться в друк",
+    "арстві",
+    " та д",
+    "изайні. "
+  ],
   [
-    " аж з XVI сторіччя, " ,
-    "коли нев" ,
-    "ідомий" ,
-    " друкар взяв шри"
+    "Lorem Ipsum",
+    " є фактично стандарт",
+    "ною \"рибою\"",
+    " аж з "
   ]
 ]
 
@@ -77,21 +77,16 @@ Csv.prototype.parse = function (string, separator) {
   }
 }
 
-Csv.prototype.generate = function (array, separator) {
+Csv.prototype.generate = function (array, separator = ',') {
   this.array = array;
   this.sep = separator;
 
   let result = '';
 
-  if (!this.sep) {
-    this.array.forEach(arr => {
-      result += arr.join(',') + '\n'
+    this.array.forEach((arr, index) => {
+      result += arr.join(this.sep)
+      index !== this.array.length - 1 ? result += '\n' : null
     })
-  } else {
-    this.array.forEach(arr => {
-      result += arr.join(separator) + '\n'
-    })
-  }
 
   return result;
 }
