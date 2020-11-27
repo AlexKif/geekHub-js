@@ -43,7 +43,7 @@ Csv.prototype.parse = function (string, separator) {
 
     const coincidences = strings.map(str => {
       return separators.map((separator, index) => {
-        return {key: keys[index], value: str.match(separator) ? str.match(separator).length: 0}
+        return { key: keys[index], value: str.match(separator) ? str.match(separator).length: 0 }
       });
     });
 
@@ -57,7 +57,7 @@ Csv.prototype.parse = function (string, separator) {
       })
     })
 
-    for (let key in filteredCoincidences) {
+    for (const key in filteredCoincidences) {
       filteredCoincidences[key].every(element => {
         return element === filteredCoincidences[key][0] && element !== 0
       }) ? selectedSeparator = key: null;
@@ -90,4 +90,8 @@ Csv.prototype.generate = function (array, separator = ',') {
 
   return result;
 }
+
+
+var csv = new Csv();
+console.log(csv.generate(str3));
 
