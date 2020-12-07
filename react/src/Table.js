@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Table(props) {
 	const { columns, rows, cell, data } = props;
-	console.log(cell, data)
+
 	const arrEn = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 	const key = () => '_' + Math.random().toString(36).substr(2, 9);
 
