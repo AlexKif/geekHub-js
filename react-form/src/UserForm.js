@@ -132,7 +132,6 @@ export default class UserForm extends PureComponent {
 
     render() {
         const {name, email, password, validation} = this.state;
-        console.log(validation.phones)
         return (
             <div className="wrapper">
                 <div className="inputs-group">
