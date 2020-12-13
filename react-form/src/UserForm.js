@@ -102,7 +102,15 @@ export default class UserForm extends PureComponent {
     }
 
     addNumber = () => {
-        this.setState(state => ({phones: [...state.phones, {number: '', type: 'home'}]}))
+        this.setState(state => {
+            return {
+                phones: [{number: '', type: 'home'}, ...state.phones],
+                validation: {
+                    ...state.validation,
+                    phones: [null, ...state.validation.phones]
+                }
+            }
+        })
     }
 
     deleteNumber = (index) => {
@@ -124,6 +132,7 @@ export default class UserForm extends PureComponent {
 
     render() {
         const {name, email, password, validation} = this.state;
+        console.log(validation.phones)
         return (
             <div className="wrapper">
                 <div className="inputs-group">
