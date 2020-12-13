@@ -82,37 +82,22 @@ export default class UserForm extends PureComponent {
 
     validateFields = ({field, value}) => {
         const nameRegEx = /^([А-Яа-яёЁЇїІіЄєҐґ]+\s+){2}[А-Яа-яёЁЇїІіЄєҐґ]+$/;
-        const EmailRegEx = /^([a-zA-Z0-9]|(?!\.)[a-zA-Z0-9-.]{1,}[a-zA-Z0-9-])@([a-zA-Z0-9-]+[.]+[a-zA-Z0-9-]+)+$/;
+        const emailRegEx = /^([a-zA-Z0-9]|(?!\.)[a-zA-Z0-9-.]{1,}[a-zA-Z0-9-])@([a-zA-Z0-9-]+[.]+[a-zA-Z0-9-]+)+$/;
         const passRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
         const homeRegEx = /^[1-9]{6}$/;
         const mobileRegEx = /^(0[0-9]{9}|3[0-9]{11})$/;
 
         switch (field) {
             case 'name':
-                return {
-                    field: field,
-                    result: nameRegEx.test(value)
-                }
+                return {field, result: nameRegEx.test(value)}
             case 'email':
-                return {
-                    field: field,
-                    result: EmailRegEx.test(value)
-                }
+                return {field, result: emailRegEx.test(value)}
             case 'password':
-                return {
-                    field: field,
-                    result: passRegEx.test(value)
-                }
+                return {field, result: passRegEx.test(value)}
             case 'home':
-                return {
-                    field: field,
-                    result: homeRegEx.test(value)
-                }
+                return {field, result: homeRegEx.test(value)}
             case 'mobile':
-                return {
-                    field: field,
-                    result: mobileRegEx.test(value)
-                }
+                return {field, result: mobileRegEx.test(value)}
         }
     }
 
