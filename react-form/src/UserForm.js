@@ -129,6 +129,11 @@ export default class UserForm extends PureComponent {
             }
         })
     }
+    
+    setValidationStyles = (isValid) => {
+        return isValid === false ? {background: '#F9D0C4', borderColor: 'transparent'}:
+            isValid === true ? {background: '#C2E0C6', borderColor: 'transparent'}: null
+    }
 
     render() {
         const {name, email, password, validation} = this.state;
@@ -139,22 +144,19 @@ export default class UserForm extends PureComponent {
                         <Input placeholder="Name"
                                value={name}
                                type="text"
-                               style={validation.name === false ? {background: '#F9D0C4', borderColor: 'transparent'}:
-                                   validation.name === true ? {background: '#C2E0C6', borderColor: 'transparent'}: null}
+                               style={this.setValidationStyles(validation.name)}
                                onChange={(e) => this.inputHandler(e.target.value, 'name')}
                         />
                         <Input placeholder="Email"
                                value={email}
                                type="text"
-                               style={validation.email === false ? {background: '#F9D0C4', borderColor: 'transparent'}:
-                                   validation.email === true ? {background: '#C2E0C6', borderColor: 'transparent'}: null}
+                               style={this.setValidationStyles(validation.email)}
                                onChange={(e) => this.inputHandler(e.target.value, 'email')}
                         />
                         <Input placeholder="Password"
                                value={password}
                                type="password"
-                               style={validation.password === false ? {background: '#F9D0C4', borderColor: 'transparent'}:
-                                   validation.password === true ? {background: '#C2E0C6', borderColor: 'transparent'}: null}
+                               style={this.setValidationStyles(validation.password)}
                                onChange={(e) => this.inputHandler(e.target.value, 'password')}
                         />
                         <div className="">
@@ -165,8 +167,7 @@ export default class UserForm extends PureComponent {
                                             <Input placeholder="Phone number"
                                                    type="phone"
                                                    value={item.number}
-                                                   style={validation.phones[index] === false ? {background: '#F9D0C4', borderColor: 'transparent'}:
-                                                       validation.phones[index] === true ? {background: '#C2E0C6', borderColor: 'transparent'}: null}
+                                                   style={this.setValidationStyles(validation.phones[index])}
                                                    onChange={(e) => this.phoneHandler(e.target.value, 'number', index)}
                                             />
                                             <Select value={item.type} onChange={(value) => this.phoneHandler(value, 'type', index)}>
