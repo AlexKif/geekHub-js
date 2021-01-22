@@ -40,7 +40,7 @@ const testData = [
 function App() {
 
   const [todos, setTodos] = useState([]);
-  const [filteredTodos, setFilteredTodos] = useState()
+  const [filteredTodos, setFilteredTodos] = useState([])
 
   const [value, setValue] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -58,6 +58,20 @@ function App() {
   }
 
   useEffect(() => {
+    console.log(filteredTodos)
+    switch (activeFilter) {
+      case 'all':
+        setFilteredTodos(todos)
+        break;
+      case 'active':
+        let activeTodos = todos.filter(item => !item.isDone)
+        setFilteredTodos(activeTodos)
+        break;
+      case 'completed':
+        let completedTodos = todos.filter(item => item.isDone)
+        setFilteredTodos(completedTodos)
+        break;
+    }
     // console.log(todos)
     // if (todos.length) setAllTodosSwitch(false)
   }, [todos])
@@ -68,9 +82,6 @@ function App() {
         isDone: false,
         value,
         id: uniqueId()
-      }
-      if (activeFilter === 'all') {
-        setFilteredTodos({...filteredTodos, all: todos})
       }
       setTodos([newTodo, ...todos])
       setValue('')
@@ -111,19 +122,18 @@ function App() {
 
   const filterHandler = (e, filterBy) => {
     setActiveFilter(filterBy)
+    // setAllTodosSwitch(false)
     switch (filterBy) {
       case 'all':
+        setFilteredTodos(todos)
         break;
       case 'active':
         let activeTodos = todos.filter(item => !item.isDone)
-        console.log(activeTodos)
         setFilteredTodos(activeTodos)
-        setActiveFilter('active')
         break;
       case 'completed':
         let completedTodos = todos.filter(item => item.isDone)
         setFilteredTodos(completedTodos)
-        setActiveFilter('completed')
         break;
     }
   }
@@ -146,7 +156,7 @@ function App() {
           <input type="checkbox" checked={allTodosSwitch} onChange={allTodosHandler}/>
           <input type="text" value={value} onChange={todoHandler} onKeyDown={onKeyDown} />
       </div>
-      {activeFilter === 'all' ? todos.map((item, index) => {
+      {filteredTodos?.map((item, index) => {
         return (
           <div key={item.value + index}>
             <label>
@@ -157,18 +167,7 @@ function App() {
             <button onClick={(e) => deleteTodo(e, item)}>delete</button>
           </div>
         )
-      }): filteredTodos.map((item, index) => {
-        console.log('tut', item)
-        return (
-          <div key={item.value + index}>
-            <label>
-              <input type="checkbox" checked={item.isDone} onChange={(e) => todoStatusHandler(e, item)}/>
-              <TodoItem isDone={item.isDone}>{item.value}</TodoItem>
-
-            </label>
-            <button onClick={(e) => deleteTodo(e, item)}>delete</button>
-          </div>
-        )})}
+      })}
       <div className="todos-information">
         <div className="">
           <span>Completed todos: {getCountCompletedTodos()}</span>
