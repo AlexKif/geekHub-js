@@ -4,15 +4,44 @@ import todo, {addTodo} from "./slices/todo";
 import uniqueId from 'lodash/uniqueId';
 import styled from 'styled-components'
 
-const initialTodos = {
-  all: [],
-  active: [],
-  completed: []
-}
+const testData = [
+  {
+    isDone: true,
+    value: "qweqeqeqeq1231321qweqwe13231",
+    id: 1
+  },
+  {
+    isDone: false,
+    value: "123131qweqeqeq",
+    id: 2
+  },
+  {
+    isDone: false,
+    value: "qweqewewqewqewqewqeqe",
+    id: 3
+  },
+  {
+    isDone: true,
+    value: "qweqeqeqeqeqewqeqqwe",
+    id: 4
+  },
+  {
+    isDone: true,
+    value: "qweqeqeqeq1231321qweqwe13231",
+    id: 5
+  },
+  {
+    isDone: false,
+    value: "123131qweqeqeq",
+    id: 6
+  },
+]
 
 function App() {
 
-  const [todos, setTodos] = useState(initialTodos);
+  const [todos, setTodos] = useState([]);
+  const [filteredTodos, setFilteredTodos] = useState()
+
   const [value, setValue] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [allTodosSwitch, setAllTodosSwitch] = useState(false);
@@ -28,10 +57,9 @@ function App() {
     setValue(e.target.value)
   }
 
-
   useEffect(() => {
-    console.log(todos)
-    if (!todos[activeFilter].length) setAllTodosSwitch(false)
+    // console.log(todos)
+    // if (todos.length) setAllTodosSwitch(false)
   }, [todos])
 
   const onKeyDown = (e) => {
@@ -41,30 +69,28 @@ function App() {
         value,
         id: uniqueId()
       }
-      if (activeFilter === 'all' || activeFilter === 'active') {
-        setTodos({...todos, [activeFilter]: [newTodo, ...todos[activeFilter]]})
-      } else {
-        setTodos({...todos, all: [newTodo, ...todos.all]})
+      if (activeFilter === 'all') {
+        setFilteredTodos({...filteredTodos, all: todos})
       }
-
+      setTodos([newTodo, ...todos])
       setValue('')
     }
   }
 
 
   const allTodosHandler = (e) => {
-    const updatedTodos = todos[activeFilter].map(item => {
+    const updatedTodos = todos.map(item => {
       return {
         ...item,
         isDone: e.target.checked,
       }
     })
-    setTodos({...todos, [activeFilter]: updatedTodos})
+    setTodos(updatedTodos)
     setAllTodosSwitch(prevState => !prevState)
   }
 
   const todoStatusHandler = (e, item) => {
-    const updatedTodos = todos[activeFilter].map(todo => {
+    const updatedTodos = todos.map(todo => {
       if (todo.id === item.id) {
         return {
           ...todo,
@@ -74,7 +100,7 @@ function App() {
         return todo
       }
     })
-    setTodos({...todos, [activeFilter]: updatedTodos})
+    setTodos(updatedTodos)
   }
 
   const deleteTodo = (e, item) => {
@@ -85,26 +111,19 @@ function App() {
 
   const filterHandler = (e, filterBy) => {
     setActiveFilter(filterBy)
-    const mergeTodos = [...todos.all, ...todos.active, ...todos.completed];
     switch (filterBy) {
       case 'all':
-        let allTodos = {[activeFilter]: mergeTodos}
-        // setTodos(allTodos)
-        console.log('all')
         break;
       case 'active':
-        let activeTodos = {[activeFilter]: mergeTodos.filter(item => {
-          return !item.isDone
-          })}
-        // setTodos(activeTodos)
-        console.log('active')
+        let activeTodos = todos.filter(item => !item.isDone)
+        console.log(activeTodos)
+        setFilteredTodos(activeTodos)
+        setActiveFilter('active')
         break;
       case 'completed':
-        let completedTodos = {[activeFilter]: mergeTodos.filter(item => {
-            return item.isDone
-          })}
-        // setTodos(completedTodos)
-        console.log('completed')
+        let completedTodos = todos.filter(item => item.isDone)
+        setFilteredTodos(completedTodos)
+        setActiveFilter('completed')
         break;
     }
   }
@@ -127,8 +146,7 @@ function App() {
           <input type="checkbox" checked={allTodosSwitch} onChange={allTodosHandler}/>
           <input type="text" value={value} onChange={todoHandler} onKeyDown={onKeyDown} />
       </div>
-
-      {todos[activeFilter].map((item, index) => {
+      {activeFilter === 'all' ? todos.map((item, index) => {
         return (
           <div key={item.value + index}>
             <label>
@@ -139,8 +157,18 @@ function App() {
             <button onClick={(e) => deleteTodo(e, item)}>delete</button>
           </div>
         )
-      })}
+      }): filteredTodos.map((item, index) => {
+        console.log('tut', item)
+        return (
+          <div key={item.value + index}>
+            <label>
+              <input type="checkbox" checked={item.isDone} onChange={(e) => todoStatusHandler(e, item)}/>
+              <TodoItem isDone={item.isDone}>{item.value}</TodoItem>
 
+            </label>
+            <button onClick={(e) => deleteTodo(e, item)}>delete</button>
+          </div>
+        )})}
       <div className="todos-information">
         <div className="">
           <span>Completed todos: {getCountCompletedTodos()}</span>
