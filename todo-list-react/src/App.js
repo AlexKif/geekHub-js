@@ -7,6 +7,7 @@ import styled from 'styled-components'
 function App() {
   const [value, setValue] = useState('');
   const [allTodosSwitch, setAllTodosSwitch] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const dispatch = useDispatch();
   const {todos} = useSelector((state) => state.todosSlice);
@@ -18,21 +19,23 @@ function App() {
   }
 
   useEffect(() => {
-    filterHandler()
+    filterHandler(activeFilter)
   }, [todos])
 
   const onKeyDown = (e) => {
     if (e.key === 'Enter') {
       const newTodo = {
-        isDone: false,
+        isDone: activeFilter === 'completed',
         value,
         id: uniqueId()
       }
+      // if (activeFilter === 'completed') {
+      //
+      // }
       dispatch(setTodo([newTodo, ...todos]))
       setValue('')
     }
   }
-
 
   const allTodosHandler = (e) => {
     const updatedTodos = todos.map(item => {
@@ -66,6 +69,7 @@ function App() {
   }
 
   const filterHandler = (filterBy = 'all') => {
+    setActiveFilter(filterBy);
     switch (filterBy) {
       case 'all':
         dispatch(setFilteredTodos(todos));
