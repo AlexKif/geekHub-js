@@ -1,56 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {useDispatch, useSelector} from "react-redux"
-import todo, {addTodo} from "./slices/todo";
+import {setTodo, setFilteredTodos} from "./slices/todo";
 import uniqueId from 'lodash/uniqueId';
 import styled from 'styled-components'
 
-const testData = [
-  {
-    isDone: true,
-    value: "qweqeqeqeq1231321qweqwe13231",
-    id: 1
-  },
-  {
-    isDone: false,
-    value: "123131qweqeqeq",
-    id: 2
-  },
-  {
-    isDone: false,
-    value: "qweqewewqewqewqewqeqe",
-    id: 3
-  },
-  {
-    isDone: true,
-    value: "qweqeqeqeqeqewqeqqwe",
-    id: 4
-  },
-  {
-    isDone: true,
-    value: "qweqeqeqeq1231321qweqwe13231",
-    id: 5
-  },
-  {
-    isDone: false,
-    value: "123131qweqeqeq",
-    id: 6
-  },
-]
-
 function App() {
-
-  const [todos, setTodos] = useState([]);
-  const [filteredTodos, setFilteredTodos] = useState([])
-
   const [value, setValue] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
   const [allTodosSwitch, setAllTodosSwitch] = useState(false);
 
   const dispatch = useDispatch();
-  const {todosList} = useSelector((state) => state.todosSlice);
-  function addNumbers () {
-    dispatch(addTodo([5, 10, 15]))
-  }
+  const {todos} = useSelector((state) => state.todosSlice);
+  const {filteredTodos} = useSelector((state) => state.todosSlice);
 
   const todoHandler = (e) => {
     e.preventDefault()
@@ -58,22 +18,7 @@ function App() {
   }
 
   useEffect(() => {
-    console.log(filteredTodos)
-    switch (activeFilter) {
-      case 'all':
-        setFilteredTodos(todos)
-        break;
-      case 'active':
-        let activeTodos = todos.filter(item => !item.isDone)
-        setFilteredTodos(activeTodos)
-        break;
-      case 'completed':
-        let completedTodos = todos.filter(item => item.isDone)
-        setFilteredTodos(completedTodos)
-        break;
-    }
-    // console.log(todos)
-    // if (todos.length) setAllTodosSwitch(false)
+    filterHandler()
   }, [todos])
 
   const onKeyDown = (e) => {
@@ -83,7 +28,7 @@ function App() {
         value,
         id: uniqueId()
       }
-      setTodos([newTodo, ...todos])
+      dispatch(setTodo([newTodo, ...todos]))
       setValue('')
     }
   }
@@ -96,7 +41,7 @@ function App() {
         isDone: e.target.checked,
       }
     })
-    setTodos(updatedTodos)
+    dispatch(setTodo(updatedTodos))
     setAllTodosSwitch(prevState => !prevState)
   }
 
@@ -111,44 +56,42 @@ function App() {
         return todo
       }
     })
-    setTodos(updatedTodos)
+    dispatch(setTodo(updatedTodos))
   }
 
   const deleteTodo = (e, item) => {
     e.preventDefault();
     const updatedTodos = todos.filter(todo => todo.id !== item.id)
-    setTodos(updatedTodos)
+    dispatch(setTodo(updatedTodos))
   }
 
-  const filterHandler = (e, filterBy) => {
-    setActiveFilter(filterBy)
-    // setAllTodosSwitch(false)
+  const filterHandler = (filterBy = 'all') => {
     switch (filterBy) {
       case 'all':
-        setFilteredTodos(todos)
+        dispatch(setFilteredTodos(todos));
         break;
       case 'active':
         let activeTodos = todos.filter(item => !item.isDone)
-        setFilteredTodos(activeTodos)
+        dispatch(setFilteredTodos(activeTodos));
         break;
       case 'completed':
         let completedTodos = todos.filter(item => item.isDone)
-        setFilteredTodos(completedTodos)
+        dispatch(setFilteredTodos(completedTodos));
         break;
     }
   }
 
   const deleteCompletedTodos = (e) => {
     e.preventDefault();
-    let updatedTodos = todos.filter(todo => !todo.isDone)
-    setTodos(updatedTodos);
+    let updatedTodos = todos.filter(todo => !todo.isDone);
+
+    dispatch(setTodo(updatedTodos));
     setAllTodosSwitch(prevState => !prevState);
   }
 
-  const getCountCompletedTodos = () => {
-    // return todos.filter(todo => todo.isDone).length
-    return 6
-  }
+  const getCountCompletedTodos = useMemo(() => {
+    return filteredTodos.filter(todo => todo.isDone).length
+  }, [filteredTodos])
 
   return (
     <div className="app">
@@ -170,14 +113,14 @@ function App() {
       })}
       <div className="todos-information">
         <div className="">
-          <span>Completed todos: {getCountCompletedTodos()}</span>
+          <span>Completed todos: {getCountCompletedTodos}</span>
         </div>
         <div className="todo-filter">
-          <input defaultChecked={true} onChange={(e) => filterHandler(e, 'all')} id="allTodos" name="todoFilter" type="radio"/><label htmlFor="allTodos">All</label>
-          <input onChange={(e) => filterHandler(e, 'active')} id="activeTodos" name="todoFilter" type="radio"/><label htmlFor="activeTodos">Active</label>
-          <input onChange={(e) => filterHandler(e, 'completed')} id="completedTodos" name="todoFilter"  type="radio"/><label htmlFor="completedTodos">Completed</label>
+          <input defaultChecked={true} onChange={() => filterHandler('all')} id="allTodos" name="todoFilter" type="radio"/><label htmlFor="allTodos">All</label>
+          <input onChange={() => filterHandler('active')} id="activeTodos" name="todoFilter" type="radio"/><label htmlFor="activeTodos">Active</label>
+          <input onChange={() => filterHandler('completed')} id="completedTodos" name="todoFilter"  type="radio"/><label htmlFor="completedTodos">Completed</label>
         </div>
-        {getCountCompletedTodos() ? <button onClick={deleteCompletedTodos} className="delete-completed-todos">Clear completed</button>: null}
+        {getCountCompletedTodos ? <button onClick={deleteCompletedTodos} className="delete-completed-todos">Clear completed</button>: null}
       </div>
     </div>
   );
