@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {useDispatch, useSelector} from "react-redux"
-import {setTodo, setFilteredTodos} from "./slices/todo";
+import {setTodo, setFilteredTodos, replaceAllTodos, changeTodoStatus} from "./slices/todo";
 import uniqueId from 'lodash/uniqueId';
 import styled from 'styled-components'
 
@@ -13,62 +13,50 @@ function App() {
   const {todos} = useSelector((state) => state.todosSlice);
   const {filteredTodos} = useSelector((state) => state.todosSlice);
 
-  const todoHandler = (e) => {
+
+  const todoHandler = useCallback((e) => {
     e.preventDefault()
     setValue(e.target.value)
-  }
+  }, [])
 
   useEffect(() => {
     filterHandler(activeFilter)
   }, [todos])
 
-  const onKeyDown = (e) => {
+
+  const onKeyDown = useCallback((e) => {
     if (e.key === 'Enter') {
       const newTodo = {
         isDone: activeFilter === 'completed',
         value,
         id: uniqueId()
       }
-      // if (activeFilter === 'completed') {
-      //
-      // }
-      dispatch(setTodo([newTodo, ...todos]))
+      dispatch(setTodo(newTodo))
       setValue('')
     }
-  }
+  }, [value])
 
-  const allTodosHandler = (e) => {
-    const updatedTodos = todos.map(item => {
-      return {
-        ...item,
-        isDone: e.target.checked,
-      }
-    })
-    dispatch(setTodo(updatedTodos))
+  const allTodosHandler = useCallback((e) => {
+    const changedTodos = todos.map(item => ({
+      ...item,
+      isDone: e.target.checked,
+    }))
+    dispatch(replaceAllTodos(changedTodos))
     setAllTodosSwitch(prevState => !prevState)
-  }
+  }, [todos])
 
-  const todoStatusHandler = (e, item) => {
-    const updatedTodos = todos.map(todo => {
-      if (todo.id === item.id) {
-        return {
-          ...todo,
-          isDone: !todo.isDone
-        }
-      } else {
-        return todo
-      }
-    })
-    dispatch(setTodo(updatedTodos))
-  }
+  const todoStatusHandler = useCallback((changedTodo) => {
+    const todoIndex = todos.findIndex(item => item.id === changedTodo.id)
+    dispatch(changeTodoStatus(todoIndex))
+  }, [todos])
 
-  const deleteTodo = (e, item) => {
+  const deleteTodo = useCallback((e, item) => {
     e.preventDefault();
     const updatedTodos = todos.filter(todo => todo.id !== item.id)
-    dispatch(setTodo(updatedTodos))
-  }
+    dispatch(replaceAllTodos(updatedTodos))
+  }, [todos])
 
-  const filterHandler = (filterBy = 'all') => {
+  const filterHandler = useCallback((filterBy = 'all') => {
     setActiveFilter(filterBy);
     switch (filterBy) {
       case 'all':
@@ -83,15 +71,15 @@ function App() {
         dispatch(setFilteredTodos(completedTodos));
         break;
     }
-  }
+  }, [activeFilter, todos])
 
-  const deleteCompletedTodos = (e) => {
-    e.preventDefault();
+  const deleteCompletedTodos = useCallback((event) => {
+    event.preventDefault();
     let updatedTodos = todos.filter(todo => !todo.isDone);
 
-    dispatch(setTodo(updatedTodos));
+    dispatch(replaceAllTodos(updatedTodos));
     setAllTodosSwitch(prevState => !prevState);
-  }
+  }, [])
 
   const getCountCompletedTodos = useMemo(() => {
     return filteredTodos.filter(todo => todo.isDone).length
@@ -107,7 +95,7 @@ function App() {
         return (
           <div key={item.value + index}>
             <label>
-            <input type="checkbox" checked={item.isDone} onChange={(e) => todoStatusHandler(e, item)}/>
+            <input type="checkbox" checked={item.isDone} onChange={() => todoStatusHandler(item)}/>
             <TodoItem isDone={item.isDone}>{item.value}</TodoItem>
 
             </label>

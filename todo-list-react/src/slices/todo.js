@@ -10,7 +10,13 @@ const todosSlice = createSlice({
   initialState,
   reducers: {
     setTodo: (state, action) => {
-      state.todos = action.payload;
+      state.todos.unshift(action.payload);
+    },
+    replaceAllTodos: (state, action) => {
+      state.todos = action.payload
+    },
+    changeTodoStatus: (state, action) => {
+      state.todos[action.payload].isDone = !state.todos[action.payload].isDone
     },
     setFilteredTodos: (state, action) => {
       state.filteredTodos = action.payload;
@@ -18,5 +24,5 @@ const todosSlice = createSlice({
   }
 });
 
-export const { setTodo, setFilteredTodos } = todosSlice.actions;
+export const { setTodo, setFilteredTodos, replaceAllTodos, changeTodoStatus } = todosSlice.actions;
 export default todosSlice.reducer
