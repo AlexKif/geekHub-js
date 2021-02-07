@@ -13,23 +13,32 @@ body {
 
 .todo-filter {
   margin-left: 20px;
-  input {
-    display: none;
-    &:checked {
-      &+label {
-        background: cornflowerblue;
-
-      }
-    }
-  }
-  label {
-    padding: 5px;
-    border: 1px solid grey;
-    display: inline-block;
-    cursor: pointer;
+  a {
     &:not(:last-child) {
       margin-right: 10px;
     }
+  }
+  .selected {
+    color: #14af2e;
+  }
+}
+
+.single-todo {
+  &-wrapper {
+    display: flex;
+    input {
+      margin-left: 10px;
+    }
+  }
+}
+
+.todo-id {
+  color: red;
+}
+
+.todo-list {
+  button {
+    margin-right: 20px;
   }
 }
 
