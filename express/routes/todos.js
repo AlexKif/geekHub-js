@@ -26,14 +26,11 @@ router.post('/todo/complete', async (req, res) => {
 })
 
 router.post('/todo/complete/:id', async (req, res) => {
-  const todo = new Todo({
-    isDone: req.body.isDone,
-    value: req.body.value
-  })
+  const id = req.params.id;
+  await Todo.findByIdAndUpdate(id, {isDone: req.body.status})
+  const doc = await Todo.findById(id)
+  res.json(doc);
 
-
-
-  await todo.save();
 })
 
 
