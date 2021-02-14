@@ -19,18 +19,10 @@ router.post('/todo/add', async (req, res) => {
 })
 
 router.post('/todo/complete', async (req, res) => {
-  Todo.updateMany({}, {isDone: false}, { multi: true })
-
-  // Todo.find({}, await function (err, todos) {
-  //   const mapTodos = todos.map(item => {
-  //     return {
-  //       ...item,
-  //       isDone: req.body.status
-  //     }
-  //   })
-  //
-  //   res.json(mapTodos);
-  // })
+  await Todo.updateMany({}, {isDone: req.body.status})
+  Todo.find({}, await function (err, todos) {
+    res.json(todos);
+  })
 })
 
 router.post('/todo/complete/:id', async (req, res) => {
