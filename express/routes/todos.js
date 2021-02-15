@@ -45,18 +45,20 @@ router.put('/todo/complete/:id', async (req, res) => {
 router.post('/todo/complete/clear', async (req, res) => {
     await Todo.deleteMany({isDone: true}, {},(err, result) => {
     if (err) {
-      return res.json({err: 'delete error'})
+      return res.json({error: err})
     }
     return res.json(result)
   })
 })
 
-// router.delete('/todo/delete/:id', async (req, res) => {
-//   const id = req.params.id;
-//   await Todo.deleteOne({}, {isDone: req.body.status})
-//   const doc = await Todo.findById(id)
-//   res.json(doc);
-// })
-
+router.delete('/todo/delete/:id', async (req, res) => {
+  const id = req.params.id;
+  await Todo.remove({_id: id}, (err, result) => {
+    if (err) {
+      return res.json({error: err})
+    }
+    return res.json(result);
+  })
+})
 
 module.exports = router

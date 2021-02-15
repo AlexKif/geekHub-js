@@ -42,6 +42,10 @@ const Todo = (props) => {
     //   console.log(res)
     // })
 
+      API.deleteById('6029334355241925b043f53e').then(res => {
+        console.log(res)
+      })
+
   }, [])
 
   useEffect(() => {

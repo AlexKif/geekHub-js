@@ -51,4 +51,10 @@ export const API = {
       url: `${apiUrl}/todo/complete/clear`,
     });
   },
+  deleteById: async(id) => {
+    return await axios({
+      method: 'delete',
+      url: `${apiUrl}/todo/delete/${id}`,
+    });
+  },
 }
