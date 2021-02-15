@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const todoRoutes = require('./routes/todos');
 const bodyParser = require('body-parser');
-const port = 3005
+const port = 8080
 
 const express = require('express')
 const app = express()

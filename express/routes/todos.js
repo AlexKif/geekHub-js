@@ -18,14 +18,29 @@ router.get('/todo', async (req, res) => {
   });
 })
 
+router.get('/todo/:id', async (req, res) => {
+  const id = req.params.id;
+  Todo.findById(id, await function (err, todos) {
+    res.json(todos);
+  });
+})
+
+router.put('/todo/edit/:id', async (req, res) => {
+  const id = req.params.id;
+  await Todo.findByIdAndUpdate(id, {value: req.body.value})
+  const doc = await Todo.findById(id)
+  res.json(doc);
+})
+
 router.post('/todo', async (req, res) => {
   const todo = new Todo({
     isDone: req.body.isDone,
     value: req.body.value
   })
 
-  await todo.save();
-  res.json({isDone: req.body.isDone, value: req.body.value})
+  await todo.save((err, room) => {
+    res.json({isDone: req.body.isDone, value: req.body.value, ['_id']: room.id})
+  });
 })
 
 router.put('/todo/complete', async (req, res) => {
@@ -47,7 +62,9 @@ router.post('/todo/complete/clear', async (req, res) => {
     if (err) {
       return res.json({error: err})
     }
-    return res.json(result)
+    return Todo.find({}, function (err, todos) {
+      res.json(todos);
+    });
   })
 })
 
