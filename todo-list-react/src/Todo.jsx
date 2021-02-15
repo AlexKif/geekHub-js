@@ -5,6 +5,7 @@ import uniqueId from 'lodash/uniqueId';
 import styled from 'styled-components'
 import {getLSData} from "./store/LocalStorage";
 import {NavLink} from "react-router-dom";
+import {API} from "./api";
 
 const Todo = (props) => {
   const [value, setValue] = useState('');
@@ -14,10 +15,34 @@ const Todo = (props) => {
   const dispatch = useDispatch();
   const {todos} = useSelector((state) => state.todosSlice);
   const {filteredTodos} = useSelector((state) => state.todosSlice);
-
   useEffect(() => {
     filterHandler(activeFilter)
   }, [todos])
+
+  useEffect(() => {
+
+    // API.saveTodo(true, 'haha').then(res => {
+    //   console.log(res)
+    // })
+
+    // API.getAllTodos().then(res => {
+    //     // ?filter=completed
+    //   console.log(res)
+    // })
+
+    // API.allTodosHandler(true).then(res => {
+    //   console.log(res)
+    // })
+
+    // API.changeTodoStatus("60292589071ccf1a28ca80fb", true).then(res => {
+    //   console.log(res)
+    // })
+
+    // API.deleteComplete().then(res => {
+    //   console.log(res)
+    // })
+
+  }, [])
 
   useEffect(() => {
     const todos = getLSData('todos');
@@ -92,8 +117,7 @@ const Todo = (props) => {
     let updatedTodos = todos.filter(todo => !todo.isDone);
 
     dispatch(replaceAllTodos(updatedTodos));
-    setAllTodosSwitch(prevState => !prevState);
-  }, [])
+  }, [todos])
 
   const getCountCompletedTodos = useMemo(() => {
     return filteredTodos.filter(todo => todo.isDone).length
@@ -114,7 +138,7 @@ const Todo = (props) => {
 
             </label>
             <button onClick={(e) => deleteTodo(e, item)}>delete</button>
-            ID: <span class="todo-id">{item.id}</span>
+            ID: <span className="todo-id">{item.id}</span>
           </div>
         )
       })}

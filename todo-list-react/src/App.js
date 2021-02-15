@@ -20,9 +20,9 @@ function App() {
         <Route exact path="/completed">
           <Todo activeFilter="completed"/>
         </Route>
-        <Route exact path="/todo/:id">
-          <SingleTodo/>
-        </Route>
+        {/*<Route exact path="/todo/:id">*/}
+        {/*  <SingleTodo/>*/}
+        {/*</Route>*/}
         <Route exact path="/todo/:id/edit">
           <SingleTodo/>
         </Route>
