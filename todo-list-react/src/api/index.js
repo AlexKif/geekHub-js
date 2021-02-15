@@ -1,5 +1,5 @@
 import axios from "axios";
-const apiUrl = 'http://localhost:3005'
+const apiUrl = 'http://localhost:8080'
 
 export const API = {
   getAllTodos: async(query = '') => {
@@ -8,7 +8,22 @@ export const API = {
       url: `${apiUrl}/todo${query}`,
     });
   },
-  saveTodo: async(isDone, value) => {
+  getTodo: async(id) => {
+    return await axios({
+      method: 'get',
+      url: `${apiUrl}/todo/${id}`,
+    });
+  },
+  updateTodo: async(id, value) => {
+    return await axios({
+      method: 'put',
+      url: `${apiUrl}/todo/edit/${id}`,
+      data: {
+        value
+      }
+    });
+  },
+  saveTodo: async(todo) => {
     return await axios({
       method: 'post',
       url: `${apiUrl}/todo`,
@@ -16,8 +31,8 @@ export const API = {
         'Content-Type': 'application/json'
       },
       data: {
-        isDone,
-        value
+        isDone: todo.isDone,
+        value: todo.value
       }
     });
   },

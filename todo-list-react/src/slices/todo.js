@@ -1,5 +1,4 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {setDataInLS} from "../store/LocalStorage";
 
 export const initialState = {
   todos: [],
@@ -11,23 +10,23 @@ const todosSlice = createSlice({
   initialState,
   reducers: {
     setTodo: (state, action) => {
-      state.todos.unshift(action.payload);
-      setDataInLS('todos', state.todos)
+      state.todos.push(action.payload);
     },
-    replaceAllTodos: (state, action) => {
+    setAllTodos: (state, action) => {
       state.todos = action.payload
-      setDataInLS('todos', state.todos)
     },
     changeTodoStatus: (state, action) => {
-      state.todos[action.payload].isDone = !state.todos[action.payload].isDone
-      setDataInLS('todos', state.todos)
+      const index = state.todos.findIndex(item => item._id === action.payload.changedTodo._id)
+      state.todos[index].isDone = action.payload.status
     },
-    setFilteredTodos: (state, action) => {
-      state.filteredTodos = action.payload;
-      setDataInLS('filteredTodos', state.filteredTodos)
-    }
+    deleteTodo: (state, action) => {
+      const index = state.todos.findIndex(item => {
+        return item._id === action.payload._id
+      })
+      state.todos.splice(index, 1);
+    },
   }
 });
 
-export const { setTodo, setFilteredTodos, replaceAllTodos, changeTodoStatus } = todosSlice.actions;
+export const { setTodo, setAllTodos, changeTodoStatus, deleteTodo } = todosSlice.actions;
 export default todosSlice.reducer

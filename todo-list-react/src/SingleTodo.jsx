@@ -1,30 +1,29 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useParams, useRouteMatch, useHistory} from "react-router-dom";
-import {getLSData} from "./store/LocalStorage";
-import {useDispatch} from "react-redux";
-import {replaceAllTodos} from "./slices/todo";
+import {API} from "./api";
 
 const SingleTodo = () => {
-  const dispatch = useDispatch();
-  const todos = getLSData('todos');
   const {id} = useParams();
+  const [todo, setTodo] = useState({});
   const history = useHistory();
-  const todo = todos.find(item => item.id === id);
-  const [value, setValue] = useState(todo?.value ?? '');
+  const [value, setValue] = useState('');
   const isEdit = useRouteMatch("/todo/:id/edit")
+
+  useEffect(() => {
+    API.getTodo(id).then(res => {
+      setTodo(res.data)
+      setValue(res.data.value)
+    })
+  }, [])
 
   const textHandler = useCallback((e) => {
     setValue(e.target.value)
   }, [])
 
   const saveHandler = useCallback((e) => {
-    todo.value = value
-    const todoIndex = todos.findIndex(item => {
-      return item.id === todo.id
-    });
-    todos[todoIndex] = todo
-    dispatch(replaceAllTodos(todos))
-    history.push("/");
+    API.updateTodo(id, value).then(res => {
+      history.push("/");
+    })
 
   }, [value])
 

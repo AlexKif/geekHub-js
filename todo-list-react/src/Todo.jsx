@@ -1,65 +1,23 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {useDispatch, useSelector} from "react-redux"
-import {setTodo, setFilteredTodos, replaceAllTodos, changeTodoStatus} from "./slices/todo";
-import uniqueId from 'lodash/uniqueId';
+import {setTodo, setAllTodos, changeTodoStatus, deleteTodo} from "./slices/todo";
 import styled from 'styled-components'
-import {getLSData} from "./store/LocalStorage";
-import {NavLink} from "react-router-dom";
+import {NavLink, useHistory} from "react-router-dom";
 import {API} from "./api";
 
 const Todo = (props) => {
   const [value, setValue] = useState('');
   const [allTodosSwitch, setAllTodosSwitch] = useState(false);
   const [activeFilter, setActiveFilter] = useState(props.activeFilter);
+  const history = useHistory();
 
   const dispatch = useDispatch();
   const {todos} = useSelector((state) => state.todosSlice);
-  const {filteredTodos} = useSelector((state) => state.todosSlice);
-  useEffect(() => {
-    filterHandler(activeFilter)
-  }, [todos])
 
   useEffect(() => {
-
-    // API.saveTodo(true, 'haha').then(res => {
-    //   console.log(res)
-    // })
-
-    // API.getAllTodos().then(res => {
-    //     // ?filter=completed
-    //   console.log(res)
-    // })
-
-    // API.allTodosHandler(true).then(res => {
-    //   console.log(res)
-    // })
-
-    // API.changeTodoStatus("60292589071ccf1a28ca80fb", true).then(res => {
-    //   console.log(res)
-    // })
-
-    // API.deleteComplete().then(res => {
-    //   console.log(res)
-    // })
-
-      API.deleteById('6029334355241925b043f53e').then(res => {
-        console.log(res)
-      })
-
-  }, [])
-
-  useEffect(() => {
-    const todos = getLSData('todos');
-    const filteredTodos = getLSData('filteredTodos')
-
-    if (todos) {
-      dispatch(replaceAllTodos(todos))
-    }
-    if (filteredTodos?.length) {
-      dispatch(setFilteredTodos(filteredTodos))
-      filterHandler(filteredTodos)
-    }
-
+    API.getAllTodos().then(res => {
+      dispatch(setAllTodos(res.data))
+    })
   }, [])
 
   const todoHandler = useCallback((e) => {
@@ -72,60 +30,73 @@ const Todo = (props) => {
       const newTodo = {
         isDone: activeFilter === 'completed',
         value,
-        id: uniqueId()
       }
-      dispatch(setTodo(newTodo))
+      API.saveTodo(newTodo).then(res => {
+        dispatch(setTodo(res.data))
+      })
       setValue('')
     }
   }, [value])
 
   const allTodosHandler = useCallback((e) => {
-    const changedTodos = todos.map(item => ({
-      ...item,
-      isDone: e.target.checked,
-    }))
-    dispatch(replaceAllTodos(changedTodos))
-    setAllTodosSwitch(prevState => !prevState)
-  }, [todos])
-
-  const todoStatusHandler = useCallback((changedTodo) => {
-    const todoIndex = todos.findIndex(item => item.id === changedTodo.id)
-    dispatch(changeTodoStatus(todoIndex))
-  }, [todos])
-
-  const deleteTodo = useCallback((e, item) => {
     e.preventDefault();
-    const updatedTodos = todos.filter(todo => todo.id !== item.id)
-    dispatch(replaceAllTodos(updatedTodos))
+    const status = e.target.checked
+    setAllTodosSwitch(status)
+    API.allTodosHandler(status).then(res => {
+      dispatch(setAllTodos(res.data))
+    })
+  }, [todos, allTodosSwitch])
+
+  const todoStatusHandler = useCallback((e, changedTodo) => {
+    e.preventDefault();
+    const status = e.target.checked
+    API.changeTodoStatus(changedTodo._id, status).then(() => {
+      dispatch(changeTodoStatus({status, changedTodo}))
+    })
   }, [todos])
 
-  const filterHandler = useCallback((filterBy = 'all') => {
-    setActiveFilter(filterBy);
+  const deleteTodoHandler = useCallback((e, item) => {
+    e.preventDefault();
+
+    API.deleteById(item._id).then(() => {
+      dispatch(deleteTodo(item))
+    })
+  }, [todos])
+
+  const filterHandler = useCallback((filterBy) => {
+    setActiveFilter(filterBy)
     switch (filterBy) {
       case 'all':
-        dispatch(setFilteredTodos(todos));
+        API.getAllTodos().then(res => {
+          dispatch(setAllTodos(res.data))
+        })
         break;
       case 'active':
-        let activeTodos = todos.filter(item => !item.isDone)
-        dispatch(setFilteredTodos(activeTodos));
+        API.getAllTodos('?filter=active').then(res => {
+          dispatch(setAllTodos(res.data))
+        })
         break;
       case 'completed':
-        let completedTodos = todos.filter(item => item.isDone)
-        dispatch(setFilteredTodos(completedTodos));
+        API.getAllTodos('?filter=completed').then(res => {
+          dispatch(setAllTodos(res.data))
+        })
         break;
     }
-  }, [activeFilter, todos])
+  }, [])
 
   const deleteCompletedTodos = useCallback((event) => {
-    event.preventDefault();
-    let updatedTodos = todos.filter(todo => !todo.isDone);
-
-    dispatch(replaceAllTodos(updatedTodos));
+    API.deleteComplete().then(res => {
+      dispatch(setAllTodos(res.data))
+    })
   }, [todos])
 
   const getCountCompletedTodos = useMemo(() => {
-    return filteredTodos.filter(todo => todo.isDone).length
-  }, [filteredTodos])
+    return todos.filter(todo => todo.isDone).length
+  }, [todos])
+
+  const editTodoHandler = useCallback((item) => {
+    history.push(`/todo/${item._id}/edit`)
+  }, [])
 
   return (
     <div className="app">
@@ -133,16 +104,17 @@ const Todo = (props) => {
         <input type="checkbox" checked={allTodosSwitch} onChange={allTodosHandler}/>
         <input type="text" value={value} onChange={todoHandler} onKeyDown={onKeyDown} />
       </div>
-      {filteredTodos?.map((item, index) => {
+      {todos?.map((item) => {
         return (
-          <div key={item.value + index} className="todo-list">
+          <div key={item._id} className="todo-list">
             <label>
-              <input type="checkbox" checked={item.isDone} onChange={() => todoStatusHandler(item)}/>
+              <input type="checkbox" checked={item.isDone} onChange={(e) => todoStatusHandler(e, item)}/>
               <TodoItem isDone={item.isDone}>{item.value}</TodoItem>
 
             </label>
-            <button onClick={(e) => deleteTodo(e, item)}>delete</button>
-            ID: <span className="todo-id">{item.id}</span>
+            <button onClick={(e) => deleteTodoHandler(e, item)}>delete</button>
+            <button onClick={() => editTodoHandler(item)}>edit</button>
+            ID: <span className="todo-id">{item._id}</span>
           </div>
         )
       })}
