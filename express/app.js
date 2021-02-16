@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const todoRoutes = require('./routes/todos');
 const bodyParser = require('body-parser');
+const {resolve} = require('path');
 const port = 8080
 
 const express = require('express')
@@ -17,7 +18,7 @@ app.use(todoRoutes)
 
 async function start() {
   try {
-    mongoose.connect('mongodb+srv://admin:qweqweqwe@cluster0.jn9kq.mongodb.net/todos', {
+    await mongoose.connect('mongodb+srv://admin:qweqweqwe@cluster0.jn9kq.mongodb.net/todos', {
       useNewUrlParser: true,
       useFindAndModify: true,
       useUnifiedTopology: true
@@ -29,5 +30,11 @@ async function start() {
     console.log(err)
   }
 }
+
+app.use(
+  require('express').static(
+    resolve(__dirname, 'public')
+  )
+);
 
 start();
