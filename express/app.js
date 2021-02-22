@@ -6,6 +6,13 @@ const port = 8080
 
 const express = require('express')
 const app = express()
+const httpServer = require("http").createServer(app);
+const io = require('socket.io')(httpServer, {
+  cors: {
+    origin: '*'
+  }
+})
+httpServer.listen(8000)
 
 const cors = require('cors')
 
@@ -13,8 +20,14 @@ app.use(cors())
 app.options('*', cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.set('io', io)
 app.use(todoRoutes)
 
+app.use(
+  require('express').static(
+    resolve(__dirname, 'public')
+  )
+);
 
 async function start() {
   try {
@@ -30,11 +43,8 @@ async function start() {
     console.log(err)
   }
 }
+start()
 
-app.use(
-  require('express').static(
-    resolve(__dirname, 'public')
-  )
-);
-
-start();
+io.on('connection', (client) => {
+  console.log('New user connection')
+});

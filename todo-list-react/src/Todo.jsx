@@ -31,9 +31,7 @@ const Todo = (props) => {
         isDone: activeFilter === 'completed',
         value,
       }
-      API.saveTodo(newTodo).then(res => {
-        dispatch(setTodo(res.data))
-      })
+      API.saveTodo(newTodo)
       setValue('')
     }
   }, [value])
@@ -42,25 +40,19 @@ const Todo = (props) => {
     e.preventDefault();
     const status = e.target.checked
     setAllTodosSwitch(status)
-    API.allTodosHandler(status).then(res => {
-      dispatch(setAllTodos(res.data))
-    })
+    API.allTodosHandler(status)
   }, [todos, allTodosSwitch])
 
   const todoStatusHandler = useCallback((e, changedTodo) => {
     e.preventDefault();
     const status = e.target.checked
-    API.changeTodoStatus(changedTodo._id, status).then(() => {
-      dispatch(changeTodoStatus({status, changedTodo}))
-    })
+    API.changeTodoStatus(changedTodo._id, status)
   }, [todos])
 
   const deleteTodoHandler = useCallback((e, item) => {
     e.preventDefault();
 
-    API.deleteById(item._id).then(() => {
-      dispatch(deleteTodo(item))
-    })
+    API.deleteById(item._id)
   }, [todos])
 
   const filterHandler = useCallback((filterBy) => {
@@ -85,9 +77,7 @@ const Todo = (props) => {
   }, [])
 
   const deleteCompletedTodos = useCallback((event) => {
-    API.deleteComplete().then(res => {
-      dispatch(setAllTodos(res.data))
-    })
+    API.deleteComplete();
   }, [todos])
 
   const getCountCompletedTodos = useMemo(() => {

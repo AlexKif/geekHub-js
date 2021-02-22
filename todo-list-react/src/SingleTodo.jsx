@@ -21,10 +21,7 @@ const SingleTodo = () => {
   }, [])
 
   const saveHandler = useCallback((e) => {
-    API.updateTodo(id, value).then(res => {
-      history.push("/");
-    })
-
+    API.updateTodo(id, value).then(history.push("/"));
   }, [value])
 
   return (
