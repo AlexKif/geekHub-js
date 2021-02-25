@@ -5,35 +5,42 @@ const router = Router();
 router.get('/todo', async (req, res) => {
   const {filter} = req.query;
   const where = filter === 'active' ? {isDone: false} : filter === 'completed' ? {isDone: true} : {};
-  Todo.find(where, await function (err, todos) {
-    if (err) {
-      return res.json(err)
-    }
-    res.json(todos);
-  });
+
+  Todo.find(where)
+    .then((doc) => {
+      return res.json(doc.map(item => {
+        return item['_doc'];
+      }))
+    })
+    .catch((err) => {
+      res.json(err)
+    })
 })
 
 router.get('/todo/:id', async (req, res) => {
   const id = req.params.id;
-  Todo.findById(id, await function (err, todos) {
-    if (err) {
-      return res.json(err)
-    }
-    res.json(todos);
-  });
+
+  Todo.findById(id)
+    .then(doc => {
+      res.json(doc['_doc']);
+    })
+    .catch((err) => {
+      res.json(err)
+    })
 })
 
 router.put('/todo/edit/:id', async (req, res) => {
   const id = req.params.id;
   const io = req.app.get('io');
-  await Todo.findByIdAndUpdate(id, {value: req.body.value}, function(err, user) {
-    if (err) {
-      return res.json(err);
-    }
-  })
-  const doc = await Todo.findById(id)
-  res.json(doc);
-  io.emit('editTodo', doc);
+
+  Todo.findOneAndUpdate({_id: id}, {value: req.body.value})
+    .then((doc) => {
+      res.json({...doc['_doc'], value: req.body.value});
+      io.emit('editTodo', {...doc['_doc'], value: req.body.value});
+    })
+    .catch((err) => {
+      res.json(err);
+    })
 })
 
 router.post('/todo', async (req, res) => {
@@ -42,64 +49,78 @@ router.post('/todo', async (req, res) => {
     value: req.body.value
   })
   const io = req.app.get('io');
-  await todo.save((err, room) => {
-    if (err) {
-      return res.json(err)
-    }
-    res.json({isDone: req.body.isDone, value: req.body.value, ['_id']: room.id})
-    io.emit('newTodoAdded', {isDone: req.body.isDone, value: req.body.value, ['_id']: room.id});
-  });
+
+  todo.save()
+    .then((doc) => {
+      res.json(doc['_doc']);
+      io.emit('newTodoAdded', doc['_doc']);
+    })
+    .catch((err) => {
+      res.json(err);
+    })
 })
 
 router.put('/todo/complete', async (req, res) => {
   const io = req.app.get('io');
-  await Todo.updateMany({}, {isDone: req.body.status})
-  Todo.find({}, await function (err, todos) {
-    if (err) {
-      return res.json(err)
-    }
-    res.json(todos);
-    io.emit('allTodoComplete', todos);
-  })
+
+  Todo.updateMany({}, {isDone: req.body.status})
+    .then((doc) => {
+      Todo.find({})
+        .then((doc) => {
+          res.json(doc);
+          io.emit('allTodoComplete', doc);
+        })
+        .catch((err) => {
+          res.json(err);
+        })
+    })
+    .catch((err) => {
+      res.json(err);
+    })
 })
 
 router.put('/todo/complete/:id', async (req, res) => {
   const id = req.params.id;
   const io = req.app.get('io');
-  await Todo.findByIdAndUpdate(id, {isDone: req.body.status}, function (err) {
-    if (err) {
-      return res.json(err)
-    }
-  })
-  const doc = await Todo.findById(id)
-  res.json(doc);
-  io.emit('singleTodoComplete', req.body.status, doc);
+
+  Todo.findByIdAndUpdate(id, {isDone: req.body.status})
+    .then((doc) => {
+      res.json(doc['_doc']);
+      io.emit('singleTodoComplete', req.body.status, doc['_doc']);
+    })
+    .catch((err) => {
+      res.json(err);
+    })
 })
 
 router.post('/todo/complete/clear', async (req, res) => {
   const io = req.app.get('io');
-  await Todo.deleteMany({isDone: true}, {},(err, result) => {
-    if (err) {
-      return res.json({error: err})
-    }
-    return Todo.find({}, function (err, todos) {
-      res.json(todos);
-      io.emit('deleteCompleted', todos);
-    });
-  })
+
+  Todo.deleteMany({isDone: true})
+    .then((doc) => {
+      Todo.find({})
+        .then((doc) => {
+          res.json(doc);
+          io.emit('deleteCompleted', doc);
+        })
+        .catch((err) => {
+          res.json(err);
+        })
+    })
 })
 
 router.delete('/todo/delete/:id', async (req, res) => {
   const id = req.params.id;
   const io = req.app.get('io');
 
-  await Todo.remove({_id: id}, (err, result) => {
-    if (err) {
-      return res.json({error: err})
-    }
-    res.json(result);
-    io.emit('deletedTodo', id);
-  })
+  Todo.remove({_id: id})
+    .then((doc) => {
+      res.json(doc);
+      io.emit('deletedTodo', id);
+    })
+    .catch((err) => {
+      res.json(err);
+    })
 })
 
 module.exports = router
