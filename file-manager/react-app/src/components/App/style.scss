@@ -1,0 +1,35 @@
+#root {
+  height: 100%;
+}
+
+.sing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: inherit;
+  box-shadow: rgba(0, 0, 0, 0.31) 1px 2px 5px 0;
+  &-wrapper {
+    max-width: 450px;
+    width: 100%;
+    border: solid 1px #cbc9c9;
+    background-color: #ebebeb87;
+    padding: 20px;
+    border-radius: 5px;
+    h2 {
+      text-align: center;
+    }
+  }
+  &-question {
+    text-align: center;
+    margin-bottom: 0;
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+  .ant-form-horizontal .ant-form-item-label {
+    width: 100%;
+  }
+  .ant-btn-primary {
+    width: 100%;
+  }
+}
