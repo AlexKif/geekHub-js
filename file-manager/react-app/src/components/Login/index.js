@@ -24,6 +24,7 @@ const Login = () => {
           <Form.Item
             label="Email"
             name="email"
+            hasFeedback
             rules={[
               {
                 required: true,
@@ -39,6 +40,7 @@ const Login = () => {
           <Form.Item
             label="Password"
             name="password"
+            hasFeedback
             rules={[
               {
                 required: true,

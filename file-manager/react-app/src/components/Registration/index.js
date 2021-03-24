@@ -2,10 +2,12 @@ import React from 'react';
 import './style.scss';
 import {Button, Checkbox, Form, Input} from "antd";
 import {Link} from "react-router-dom";
+import {API} from "../../api";
 
 const Registration = () => {
 
   const onFinish = (values) => {
+    API.registration(values.email, values.password);
     console.log('Success:', values);
   };
 
