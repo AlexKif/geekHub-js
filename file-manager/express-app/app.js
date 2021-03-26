@@ -25,6 +25,3 @@ app.use(auth);
     console.error(err)
   }
 })();
-
-
-

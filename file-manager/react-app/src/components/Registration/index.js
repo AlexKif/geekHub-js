@@ -1,14 +1,20 @@
 import React from 'react';
 import './style.scss';
-import {Button, Checkbox, Form, Input} from "antd";
-import {Link} from "react-router-dom";
+import {Button, Form, Input} from "antd";
+import {Link, useHistory} from "react-router-dom";
 import {API} from "../../api";
+import {successNotification} from "../../functions";
 
 const Registration = () => {
-
+  const history = useHistory();
   const onFinish = (values) => {
-    API.registration(values.email, values.password);
-    console.log('Success:', values);
+    API.registration(values.email, values.password).then(res => {
+      if (res.status === 200) {
+        successNotification('You have successfully registered')
+        localStorage.setItem('token', res.data.token);
+        history.push('/file-manager');
+      }
+    });
   };
 
   return (
@@ -38,9 +44,6 @@ const Registration = () => {
           >
             <Input />
           </Form.Item>
-
-
-
           <Form.Item
             name="password"
             label="Password"
