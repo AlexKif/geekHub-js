@@ -42,7 +42,7 @@ router.post("/registration", (req, res) => {
     if (err) return res.json(err);
     if (!doc) {
       user.save().then(doc => {
-        saveToken(doc['_doc']['_id'], hash).then(doc => {
+        saveToken(doc['_doc']['_id'], token).then(doc => {
           res.json({email: req.body.email, password: req.body.password, token: token});
         })
       });
@@ -57,13 +57,17 @@ router.post('/login', (req, res, next) => {
   User.findOne({email: req.body.email}, function(err, doc) {
     if (err) return res.json(err);
     if (!doc) return res.status(400).json({message: 'User with this email not found'});
+    req.user = doc['_doc'];
 
     const reqPass = req.body.password + req.body.email;
     const userPass = doc['_doc'].password;
     const decodedPass = bcrypt.compareSync(reqPass, userPass);
 
     if (decodedPass) {
-      return res.json({token: token});
+      Token.findByIdAndUpdate(req.user['_id'], {token: token}, function (err, doc) {
+        if (err) return res.json(err);
+        if (doc) return res.json({token: token});
+      })
     } else {
       return res.status(400).json({message: 'Email or password is incorrect'});
     }
