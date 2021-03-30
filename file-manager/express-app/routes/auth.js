@@ -1,12 +1,11 @@
+const jwt = require('jsonwebtoken');
 const { Router } = require('express')
 const router = Router();
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 const User = require('../models/user');
 const Token = require('../models/token');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+const {createRootDocument} = require("../functions");
 
 function saveToken(id, hash) {
   const token = new Token({
@@ -14,20 +13,6 @@ function saveToken(id, hash) {
     _id: id,
   })
   return token.save();
-}
-
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-
-  if (token == null) return res.sendStatus(403);
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-    console.log(err)
-    if (err) return res.sendStatus(403);
-    req.decoded = decoded
-    next();
-  })
 }
 
 function generateAccessToken(email, isRemember = true) {
@@ -45,6 +30,8 @@ router.post("/registration", (req, res) => {
         saveToken(doc['_doc']['_id'], token).then(doc => {
           res.json({email: req.body.email, password: req.body.password, token: token});
         })
+        createRootDocument(`./storage/${doc['_doc']['_id']}`)
+
       });
     } else {
       return res.status(400).json({message: 'This email is already registered'});
