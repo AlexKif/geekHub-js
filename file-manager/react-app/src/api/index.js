@@ -41,8 +41,30 @@ export const API = {
         password: password,
         remember
       },
+    });
+  },
+
+  createFolder(name) {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'post',
+      url: `${this.baseUrl}/file-manager/folder`,
+      data: {
+        folderName: name
+      },
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`
+      }
+    });
+  },
+
+  getFilesByPath(path = '') {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'get',
+      url: `${this.baseUrl}/file-manager/files/${path}`,
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     });
   }

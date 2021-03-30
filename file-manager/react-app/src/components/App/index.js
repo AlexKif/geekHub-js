@@ -7,7 +7,6 @@ import history from "../../helpers/history";
 import FileManager from "../FileManager";
 
 const App = () => {
-
   return (
     <Router history={history}>
       <Switch>

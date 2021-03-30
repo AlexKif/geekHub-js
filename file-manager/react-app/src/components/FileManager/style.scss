@@ -1,0 +1,9 @@
+.file-manager {
+  height: 100%;
+  background: #eceaea;
+  padding: 20px;
+  &__wrapper {
+    width: inherit;
+    height: inherit;
+  }
+}

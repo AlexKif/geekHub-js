@@ -1,0 +1,20 @@
+.files-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  &__item {
+    user-select: none;
+  }
+  &__file, &__folder {
+    margin-left: 5px;
+  }
+  &__format {
+    color: #fff;
+    display: inline-block;
+    background: #232323;
+    padding: 0 5px;
+    border-radius: 5px;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+}

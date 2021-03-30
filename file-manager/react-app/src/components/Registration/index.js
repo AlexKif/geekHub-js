@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useCallback} from 'react';
 import './style.scss';
 import {Button, Form, Input} from "antd";
 import {Link, useHistory} from "react-router-dom";
@@ -7,7 +7,8 @@ import {successNotification} from "../../functions";
 
 const Registration = () => {
   const history = useHistory();
-  const onFinish = (values) => {
+
+  const onFinish = useCallback((values) => {
     API.registration(values.email, values.password).then(res => {
       if (res.status === 200) {
         successNotification('You have successfully registered')
@@ -15,7 +16,14 @@ const Registration = () => {
         history.push('/file-manager');
       }
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      history.push("/file-manager");
+    }
+  }, []);
 
   return (
     <div className="sing sign-up">

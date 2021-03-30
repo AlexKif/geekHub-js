@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
 import './style.scss';
 import {Button, Checkbox, Form, Input} from "antd";
 import {Link, useHistory} from "react-router-dom";
@@ -6,15 +6,22 @@ import {API} from "../../api";
 
 const Login = () => {
   const history = useHistory();
-  const onFinish = (values) => {
-    const token = localStorage.getItem('token');
+
+  const onFinish = useCallback((values) => {
     API.login(values.email, values.password, values.remember).then(res => {
       if (res.status === 200) {
         localStorage.setItem('token', res.data.token);
         history.push('/file-manager')
       }
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      history.push("/file-manager");
+    }
+  }, []);
 
   return (
     <div className="sing sign-in">
