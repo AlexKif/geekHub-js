@@ -6,8 +6,8 @@ import "react-contexify/dist/ReactContexify.css";
 import StructureList from "./StructureList";
 import {API} from "../../api";
 import CreateFolder from "./Modals/CreateFolder";
-import {useDispatch} from "react-redux";
-import {setFlies} from "../../slices/fileManager";
+import {useDispatch, useSelector} from "react-redux";
+import {removeLastPath, setFlies, setPath} from "../../slices/fileManager";
 
 const FileManager = () => {
   const [tempData, setTempData] = useState(null);
@@ -16,6 +16,7 @@ const FileManager = () => {
   const [selectedItem, setSelectedItem] = useState('');
   const [createIsOpen, setCreateIsOpen] = useState(false);
   const dispatch = useDispatch();
+  const {path} = useSelector((state) => state.fileManager);
 
   useEffect(() => {
     API.getFilesByPath().then(res => {
@@ -29,8 +30,6 @@ const FileManager = () => {
         setCreateIsOpen(true);
         break;
     }
-    // API.createFolder()
-    // console.log(selectedItem, event.currentTarget.id);
   }
 
   const { show } = useContextMenu({
@@ -56,14 +55,28 @@ const FileManager = () => {
   }
 
   const listDbClickHandler = (e, item) => {
-    console.log(item)
+    if (item.type === 'folder') {
+      API.getFilesByPath([...path, item.name]).then(res => {
+        dispatch(setFlies(res.data.files));
+        dispatch(setPath(item.name));
+      });
+    }
+  }
+
+  const goBack = () => {
+    const tempPath = [...path];
+    tempPath.pop();
+    API.getFilesByPath(tempPath).then(res => {
+      dispatch(setFlies(res.data.files));
+      dispatch(removeLastPath());
+    });
   }
 
   return (
     <div className="file-manager">
       <h1>Upload your first file or folder. Press the right button of your mouse to start</h1>
       <div onContextMenu={show} className="file-manager__wrapper" onContextMenuCapture={contextMenuHandler}>
-        <StructureList listContextHandler={listContextHandler} listDbClickHandler={listDbClickHandler}/>
+        <StructureList listContextHandler={listContextHandler} listDbClickHandler={listDbClickHandler} goBack={goBack}/>
       </div>
       <CustomContextMenu items={contextItems} onChange={handleItemClick}/>
       <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} contextAction={contextAction}/>

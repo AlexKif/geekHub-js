@@ -2,6 +2,7 @@ import {createSlice} from "@reduxjs/toolkit";
 
 export const initialState = {
   files: [],
+  path: [],
 }
 
 const fileManagerSlice = createSlice({
@@ -14,24 +15,14 @@ const fileManagerSlice = createSlice({
     setFlies: (state, action) => {
       state.files = action.payload
     },
-    changeTodoStatus: (state, action) => {
-      const index = state.todos.findIndex(item => item._id === action.payload.changedTodo._id)
-      state.todos[index].isDone = action.payload.status
+    setPath: (state, action) => {
+      state.path.push(action.payload);
     },
-    deleteTodo: (state, action) => {
-      const index = state.todos.findIndex(item => {
-        return item._id === action.payload
-      })
-      state.todos.splice(index, 1);
-    },
-    editTodo: (state, action) => {
-      const index = state.todos.findIndex(item => {
-        return item._id === action.payload._id
-      })
-      state.todos.splice(index, 1, action.payload);
+    removeLastPath: (state, action) => {
+      state.path.pop();
     },
   }
 });
 
-export const { setFile, setFlies, changeTodoStatus, deleteTodo, editTodo } = fileManagerSlice.actions;
+export const { setFile, setFlies, setPath, removeLastPath } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;

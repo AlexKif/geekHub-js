@@ -58,11 +58,11 @@ export const API = {
     });
   },
 
-  getFilesByPath(path = '') {
+  getFilesByPath(path = []) {
     const token = localStorage.getItem('token');
     return axios({
       method: 'get',
-      url: `${this.baseUrl}/file-manager/files/${path}`,
+      url: `${this.baseUrl}/file-manager/files?path=${path}`,
       headers: {
         Authorization: `Bearer ${token}`
       }

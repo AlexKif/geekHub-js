@@ -24,7 +24,7 @@ app.use(fileManagerRoutes);
       useUnifiedTopology: true
     });
     app.listen(port, () => {
-      console.log(`Server has been startedd`)
+      console.log(`Server has been started`)
     })
   } catch (err) {
     console.error(err)
