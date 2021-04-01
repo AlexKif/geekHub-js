@@ -4,6 +4,10 @@
   list-style: none;
   &__item {
     user-select: none;
+    position: relative;
+    &:not(&:last-child) {
+      border-bottom: 1px solid gray;
+    }
   }
   &__file, &__folder {
     margin-left: 5px;
@@ -17,9 +21,12 @@
     font-size: 10px;
     text-transform: uppercase;
   }
+  &__size {
+    position: absolute;
+    right: 0;
+  }
 }
 
 .go-back-path {
   user-select: none;
-  cursor: pointer;
 }

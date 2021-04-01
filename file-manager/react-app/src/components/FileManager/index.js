@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './style.scss';
 import CustomContextMenu from "./ContextMenu";
 import {useContextMenu} from "react-contexify";
@@ -7,7 +7,7 @@ import StructureList from "./StructureList";
 import {API} from "../../api";
 import CreateFolder from "./Modals/CreateFolder";
 import {useDispatch, useSelector} from "react-redux";
-import {removeLastPath, setFlies, setPath} from "../../slices/fileManager";
+import {removeLastPath, setFile, setFlies, setPath} from "../../slices/fileManager";
 
 const FileManager = () => {
   const [tempData, setTempData] = useState(null);
@@ -17,6 +17,7 @@ const FileManager = () => {
   const [createIsOpen, setCreateIsOpen] = useState(false);
   const dispatch = useDispatch();
   const {path} = useSelector((state) => state.fileManager);
+  const inputFile = useRef(null)
 
   useEffect(() => {
     API.getFilesByPath().then(res => {
@@ -25,9 +26,13 @@ const FileManager = () => {
   }, [])
 
   function handleItemClick({ event }){
+    // console.log(event.currentTarget.id)
     switch (event.currentTarget.id) {
       case 'createfolder':
         setCreateIsOpen(true);
+        break;
+      case 'uploadfile':
+        inputFile.current.click();
         break;
     }
   }
@@ -39,7 +44,6 @@ const FileManager = () => {
 
   const contextMenuHandler = (e) => {
     const className = e.target.className
-    console.log(className)
     if (tempData && e.target.className !== 'files-list__item') {
       return setContextItems(['Paste'])
     }
@@ -51,6 +55,7 @@ const FileManager = () => {
   }
 
   const listContextHandler = (item) => {
+    console.log(item)
     setSelectedItem(item)
   }
 
@@ -72,14 +77,28 @@ const FileManager = () => {
     });
   }
 
+  const uploadHandler = (e) => {
+    const data = e.target.files
+    const files = new FormData();
+
+    if (data.length) {
+      for (let i = 0; i < data.length; i++) {
+        files.append('file', data[i])
+      }
+      API.uploadFile(files, path).then(res => {
+        dispatch(setFile(res.data.files))
+      })
+    }
+  }
+
   return (
     <div className="file-manager">
-      <h1>Upload your first file or folder. Press the right button of your mouse to start</h1>
       <div onContextMenu={show} className="file-manager__wrapper" onContextMenuCapture={contextMenuHandler}>
         <StructureList listContextHandler={listContextHandler} listDbClickHandler={listDbClickHandler} goBack={goBack}/>
       </div>
       <CustomContextMenu items={contextItems} onChange={handleItemClick}/>
-      <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} contextAction={contextAction}/>
+      <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} contextAction={contextAction} path={path}/>
+      <input type='file' name="file-uploader" onChange={uploadHandler} id='file' multiple ref={inputFile} style={{display: 'none'}}/>
     </div>
   );
 };

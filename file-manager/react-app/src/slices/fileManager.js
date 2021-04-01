@@ -9,8 +9,15 @@ const fileManagerSlice = createSlice({
   name: "fileManager",
   initialState,
   reducers: {
+    setFolder: (state, action) => {
+      state.files.unshift(action.payload);
+    },
     setFile: (state, action) => {
-      state.files.push(action.payload);
+      if (action.payload.length > 1) {
+        state.files = [...state.files, ...action.payload];
+      } else {
+        state.files.push(action.payload[0]);
+      }
     },
     setFlies: (state, action) => {
       state.files = action.payload
@@ -24,5 +31,5 @@ const fileManagerSlice = createSlice({
   }
 });
 
-export const { setFile, setFlies, setPath, removeLastPath } = fileManagerSlice.actions;
+export const { setFolder, setFile, setFlies, setPath, removeLastPath } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;

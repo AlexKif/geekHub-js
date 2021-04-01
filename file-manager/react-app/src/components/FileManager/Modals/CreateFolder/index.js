@@ -1,15 +1,18 @@
 import React, {useState} from 'react';
 import {Button, Input, Modal} from "antd";
 import {API} from "../../../../api";
+import {useDispatch} from "react-redux";
+import {setFolder} from "../../../../slices/fileManager";
 
 const CreateFolder = (props) => {
   const [name, setName] = useState('');
+  const dispatch = useDispatch();
 
   const handleOk = () => {
-    API.createFolder(name).then((res) => {
+    API.createFolder(name, props.path).then((res) => {
       setName('');
       handleCancel();
-      console.log(res.data);
+      dispatch(setFolder(res.data))
     });
   };
 

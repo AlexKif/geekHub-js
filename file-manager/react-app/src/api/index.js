@@ -44,13 +44,16 @@ export const API = {
     });
   },
 
-  createFolder(name) {
+  createFolder(name, path) {
     const token = localStorage.getItem('token');
     return axios({
       method: 'post',
       url: `${this.baseUrl}/file-manager/folder`,
       data: {
         folderName: name
+      },
+      params: {
+        path
       },
       headers: {
         Authorization: `Bearer ${token}`
@@ -62,10 +65,43 @@ export const API = {
     const token = localStorage.getItem('token');
     return axios({
       method: 'get',
-      url: `${this.baseUrl}/file-manager/files?path=${path}`,
+      url: `${this.baseUrl}/file-manager/files`,
+      params: {
+        path
+      },
       headers: {
         Authorization: `Bearer ${token}`
       }
+    });
+  },
+
+  uploadFile(data, path = []) {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'post',
+      url: `${this.baseUrl}/file-manager/files`,
+      data: data,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        path
+      },
+    });
+  },
+
+  getImage(name, path = []) {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'get',
+      url: `${this.baseUrl}/file-manager/images/${name}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        path
+      },
     });
   }
 }
