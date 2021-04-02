@@ -91,11 +91,11 @@ export const API = {
     });
   },
 
-  getImage(name, path = []) {
+  downloadFile(name, path = []) {
     const token = localStorage.getItem('token');
     return axios({
       method: 'get',
-      url: `${this.baseUrl}/file-manager/images/${name}`,
+      url: `${this.baseUrl}/file-manager/download/${name}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -103,5 +103,5 @@ export const API = {
         path
       },
     });
-  }
+  },
 }

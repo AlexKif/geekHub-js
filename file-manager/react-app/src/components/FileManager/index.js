@@ -65,6 +65,15 @@ const FileManager = () => {
         dispatch(setFlies(res.data.files));
         dispatch(setPath(item.name));
       });
+    } else {
+      API.downloadFile(item.name, path)
+        .then(res => {
+          // window.open('data:application/octet-stream;base64,' + res.data.file, '_blank');
+          const link = document.createElement("a");
+          link.href = 'data:application/octet-stream;base64,' + res.data.file;
+          link.download = item.name;
+          link.click();
+        });
     }
   }
 
@@ -80,7 +89,6 @@ const FileManager = () => {
   const uploadHandler = (e) => {
     const data = e.target.files
     const files = new FormData();
-
     if (data.length) {
       for (let i = 0; i < data.length; i++) {
         files.append('file', data[i])
@@ -91,6 +99,11 @@ const FileManager = () => {
     }
   }
 
+  /*Reset input value and call onChange */
+  const fileClickHandler = (e) => {
+    e.target.value = null;
+  }
+
   return (
     <div className="file-manager">
       <div onContextMenu={show} className="file-manager__wrapper" onContextMenuCapture={contextMenuHandler}>
@@ -98,7 +111,7 @@ const FileManager = () => {
       </div>
       <CustomContextMenu items={contextItems} onChange={handleItemClick}/>
       <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} contextAction={contextAction} path={path}/>
-      <input type='file' name="file-uploader" onChange={uploadHandler} id='file' multiple ref={inputFile} style={{display: 'none'}}/>
+      <input type='file' name="file-uploader" onClick={fileClickHandler} onChange={uploadHandler} id='file' multiple ref={inputFile} style={{display: 'none'}}/>
     </div>
   );
 };

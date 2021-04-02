@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './style.scss';
 import {useSelector} from "react-redux";
 import {FileUnknownOutlined, FolderFilled} from '@ant-design/icons';
@@ -9,17 +9,28 @@ const StructureList = (props) => {
 
   const {files, path} = useSelector((state) => state.fileManager);
   const [showPreview, setShowPreview] = useState(false);
+  const [encodedImage, setEncodedImage] = useState({});
+  const [isSent, setIsSent] = useState(false);
 
   const mouseEnterHandler = (file) => {
-    // const format = file.name.split('.').pop()
-    // // console.log(file.type === 'file', format === 'png' || format ==='jpg');
-    // if (file.type === 'file' && format === 'png' || format ==='jpg') {
-    //   API.getImage(file.name, path);
-    // }
+    setEncodedImage({});
+    const format = file.name.split('.').pop();
+    if (!isSent && file.type === 'file' && (format === 'png' || format ==='jpg')) {
+      setShowPreview(true);
+      setIsSent(true);
+      API.downloadFile(file.name, path)
+        .then(res => {
+          setEncodedImage({image: res.data.file, id: file.id});
+          setIsSent(false);
+        })
+        .catch(err => {
+          setIsSent(false);
+        })
+    }
   }
 
   const mouseLeaveHandler = () => {
-    // setShowPreview(!showPreview);
+    setShowPreview(false);
   }
 
   return (
@@ -27,7 +38,8 @@ const StructureList = (props) => {
       {path.length ? <span onDoubleClick={props.goBack} className="go-back-path" title="go back">...</span>: null}
       <ul className="files-list">
         {files?.map((item, index) => {
-          const isValidFormat = item.type === 'file' && item.name.split('.').pop() === ('pdf' || 'doc' || 'docx' || 'png' || 'jpg' || 'mp3' || 'wav');
+          const format = item.name.split('.').pop();
+          const isValidFormat = item.type === 'file' && ( format === 'pdf' || format === 'doc' || format === 'docx' || format === 'png' || format === 'jpg' || format === 'mp3' || format === 'wav');
           if (item.type === 'folder') {
             return (
               <li key={index}
@@ -45,15 +57,18 @@ const StructureList = (props) => {
                   className="files-list__item"
                   onContextMenuCapture={() => props.listContextHandler(item)}
                   onDoubleClick={(e) => props.listDbClickHandler(e, item)}>
+
                 {isValidFormat ?
                   <span className="files-list__format">{item.name.split('.').pop()}</span> :
                   <FileUnknownOutlined />
                 }
                 <span className="files-list__file" onMouseEnter={() => mouseEnterHandler(item)} onMouseLeave={mouseLeaveHandler}>
                   {item.name}
-                  <span className={`files-list__preview ${showPreview ? 'files-list__preview_show': 'files-list__preview_hide'}`}>
-
-                  </span>
+                  {showPreview && encodedImage.id === item.id &&
+                    <span className="files-list__preview">
+                      <img src={`data:image/png;base64,${encodedImage.image}`} alt="image-preview"/>
+                    </span>
+                  }
                 </span>
                 <span className="files-list__size">{bytesToSize(item.size)}</span>
               </li>

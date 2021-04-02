@@ -9,6 +9,27 @@
       border-bottom: 1px solid gray;
     }
   }
+  &__file {
+    position: relative;
+  }
+  &__preview {
+    position: absolute;
+    left: calc(100% + 25px);
+    width: 150px;
+    height: 150px;
+    border-radius: 5px;
+    background: transparent;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+      z-index: 5;
+    }
+  }
   &__file, &__folder {
     margin-left: 5px;
   }

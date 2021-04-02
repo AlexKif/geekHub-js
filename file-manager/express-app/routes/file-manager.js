@@ -5,7 +5,7 @@ const {authenticateToken} = require("../functions");
 const {createRootDocument} = require("../functions");
 const multer = require('multer');
 const Token = require('../models/token');
-
+const path = require('path');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -38,6 +38,10 @@ router.post('/file-manager/folder', authenticateToken, function (req, res) {
   })
 })
 
+const uniqueId = () => {
+  return '_' + Math.random().toString(36).substr(2, 9);
+}
+
 
 router.get('/file-manager/files', authenticateToken, async function (req, res) {
   const reqPath = req.query.path;
@@ -57,11 +61,11 @@ router.get('/file-manager/files', authenticateToken, async function (req, res) {
           const size = fs.lstatSync(`${path}/${item}`).size;
           if (isDir) {
             return {
-              name: item, type: 'folder'
+              name: item, type: 'folder', id: uniqueId()
             }
           }
           return {
-            name: item, type: 'file', size
+            name: item, type: 'file', size, id: uniqueId()
           }
         })
         .sort(item => {
@@ -76,33 +80,32 @@ router.get('/file-manager/files', authenticateToken, async function (req, res) {
   })
 })
 
-router.post('/file-manager/files', authenticateToken, upload.array('file', 5), function (req, res) {
+router.post('/file-manager/files', authenticateToken, upload.array('file', 10), function (req, res) {
   const data = req.files.map(item => {
     return {
       name: item.originalname,
       type: 'file',
-      size: item.size
+      size: item.size,
+      id: uniqueId()
     }
   })
   return res.json({files: data});
 })
 
-router.get('/file-manager/images/:name', authenticateToken, function (req, res) {
+router.get('/file-manager/download/:name', authenticateToken, function (req, res) {
   const token = req.headers.authorization.split(' ')[1];
   const reqPath = req.query.path;
-
-  const image = req.params.name;
+  const name = req.params.name;
 
   Token.findOne({token: token}, function (err, doc) {
     if (err) return res.json(err);
 
     const root = `./storage/${doc['_doc']['_id']}`;
-    const path = reqPath ? `${root}/${reqPath.join('/')}`: root;
-    // const file = fs.readFileSync(`${path}/${image}`, {encoding: 'utf8', flag:'r'})
+    const generatedPath = reqPath ? `${root}/${reqPath.join('/')}`: root;
+    const file = fs.readFileSync(`${generatedPath}/${name}`, {encoding: 'base64'})
 
-    res.sendFile(`${path}/${image}`);
+    return res.json({file: file})
 
-    // return res.json({name: folderName, type: 'folder'});
   })
 })
 
