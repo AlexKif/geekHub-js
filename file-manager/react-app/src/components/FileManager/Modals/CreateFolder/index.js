@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Button, Input, Modal} from "antd";
 import {API} from "../../../../api";
 import {useDispatch} from "react-redux";
@@ -8,21 +8,21 @@ const CreateFolder = (props) => {
   const [name, setName] = useState('');
   const dispatch = useDispatch();
 
-  const handleOk = () => {
+  const handleOk = useCallback(() => {
     API.createFolder(name, props.path).then((res) => {
       setName('');
       handleCancel();
       dispatch(setFolder(res.data))
     });
-  };
+  }, [name, props.path])
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     props.onClose(false);
-  };
+  }, [])
 
-  const nameHandler = (e) => {
+  const nameHandler = useCallback((e) => {
     setName(e.target.value);
-  }
+  }, [])
 
   return (
     <Modal visible={props.showModal} onOk={handleOk} onCancel={handleCancel}>

@@ -135,7 +135,6 @@ export const API = {
   },
 
   renameItem(path = [], name, newName) {
-    console.log(path, name, newName)
     const token = localStorage.getItem('token');
     return axios({
       method: 'post',

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Input, Modal} from "antd";
 import {API} from "../../../../api";
 import {useDispatch} from "react-redux";
@@ -13,7 +13,7 @@ const RenameModal = (props) => {
     setName(convertedName(props.selectedItem))
   }, [props.selectedItem])
 
-  function convertedName(item) {
+  const convertedName = useCallback((item) => {
     if (item.name) {
       if (item.type === 'folder') {
         return item.name
@@ -21,9 +21,9 @@ const RenameModal = (props) => {
         return item.name.replace(/\.[^/.]+$/, "")
       }
     }
-  }
+  }, [])
 
-  const handleOk = () => {
+  const handleOk = useCallback(() => {
     const item = props.selectedItem.name.split('.');
     const format = item.pop();
     const isFile = props.selectedItem.type === 'file';
@@ -36,15 +36,15 @@ const RenameModal = (props) => {
 
       }
     });
-  };
+  }, [props.selectedItem, props.path, name])
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     props.onClose(false);
-  };
+  }, [])
 
-  const nameHandler = (e) => {
+  const nameHandler = useCallback((e) => {
     setName(e.target.value);
-  }
+  }, [])
 
   return (
     <Modal visible={props.showModal} onOk={handleOk} onCancel={handleCancel}>

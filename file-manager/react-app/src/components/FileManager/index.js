@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './style.scss';
 import CustomContextMenu from "./ContextMenu";
 import {useContextMenu} from "react-contexify";
@@ -36,9 +36,10 @@ const FileManager = () => {
     API.getFilesByPath().then(res => {
       dispatch(setFlies(res.data.files));
     });
-  }, [])
+  }, []);
 
-  function handleItemClick({ event }) {
+
+  const handleItemClick = useCallback(({ event }) => {
     setContextAction(event.currentTarget.id)
     switch (event.currentTarget.id) {
       case 'createfolder':
@@ -61,14 +62,14 @@ const FileManager = () => {
         setRenameIsOpen(true);
         break;
     }
-  }
+  }, [inputFile, contextItems]);
 
   const { show } = useContextMenu({
     /*Why not)*/
     id: '🤣'
   });
 
-  const contextMenuHandler = (e) => {
+  const contextMenuHandler = useCallback((e) => {
     const className = e.target.className
     if (tempData && className !== 'files-list__item' && className !== 'files-list__file' && className !== 'files-list__folder') {
       return setContextItems(['Paste'])
@@ -78,14 +79,14 @@ const FileManager = () => {
     } else {
       return setContextItems(['Create folder', 'Upload file'])
     }
-  }
+  }, [tempData]);
 
-  const moveHandler = () => {
+  const moveHandler = useCallback(() => {
     setFromPath(path);
     setTempData(selectedItem);
-  }
+  }, [path, selectedItem]);
 
-  const insertHandler = () => {
+  const insertHandler = useCallback(() => {
     const action = contextAction === 'cut' ? 'cut': 'copy';
     API.moveItem(tempData.name, fromPath, path, action).then(res => {
       setTempData(null);
@@ -93,13 +94,13 @@ const FileManager = () => {
       dispatch(isFile ? setFile(res.data): setFolder(res.data[0]))
       successNotification(`${isFile ? 'File': 'Folder'} was ${action === 'cut' ? 'moved': 'copied'}`)
     });
-  }
+  }, [contextAction, tempData, fromPath, path]);
 
-  const listContextHandler = (item) => {
+  const listContextHandler = useCallback((item) => {
     setSelectedItem(item)
-  }
+  }, []);
 
-  const listDbClickHandler = (e, item) => {
+  const listDbClickHandler = useCallback((e, item) => {
     if (item.type === 'folder') {
       API.getFilesByPath([...path, item.name]).then(res => {
         dispatch(setFlies(res.data.files));
@@ -115,18 +116,18 @@ const FileManager = () => {
           link.click();
         });
     }
-  }
+  }, [path]);
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     const tempPath = [...path];
     tempPath.pop();
     API.getFilesByPath(tempPath).then(res => {
       dispatch(setFlies(res.data.files));
       dispatch(removeLastPath());
     });
-  }
+  }, [path]);
 
-  const deleteHandler = () => {
+  const deleteHandler = useCallback(() => {
     API.deleteItem(selectedItem.name, path).then(res => {
       if (res.status === 200) {
         dispatch(deleteItem(selectedItem));
@@ -134,9 +135,9 @@ const FileManager = () => {
         successNotification(`${isFile ? 'File': 'Folder'} was deleted`)
       }
     });
-  }
+  }, [selectedItem, path]);
 
-  const uploadHandler = (e) => {
+  const uploadHandler = useCallback((e) => {
     const data = e.target.files
     const files = new FormData();
     if (data.length) {
@@ -147,12 +148,12 @@ const FileManager = () => {
         dispatch(setFile(res.data.files))
       })
     }
-  }
+  }, [path]);
 
   /*Reset input value and call onChange */
-  const fileClickHandler = (e) => {
+  const fileClickHandler = useCallback((e) => {
     e.target.value = null;
-  }
+  }, []);
 
   return (
     <div className="file-manager">

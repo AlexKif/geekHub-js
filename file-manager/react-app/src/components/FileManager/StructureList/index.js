@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './style.scss';
 import {useSelector} from "react-redux";
 import {FileUnknownOutlined, FolderFilled} from '@ant-design/icons';
@@ -6,13 +6,12 @@ import {bytesToSize} from "../../../helpers/common";
 import {API} from "../../../api";
 
 const StructureList = (props) => {
-
   const {files, path} = useSelector((state) => state.fileManager);
   const [showPreview, setShowPreview] = useState(false);
   const [encodedImage, setEncodedImage] = useState({});
   const [isSent, setIsSent] = useState(false);
 
-  const mouseEnterHandler = (file) => {
+  const mouseEnterHandler = useCallback((file) => {
     setEncodedImage({});
     const format = file.name.split('.').pop();
     if (!isSent && file.type === 'file' && (format === 'png' || format ==='jpg')) {
@@ -27,11 +26,11 @@ const StructureList = (props) => {
           setIsSent(false);
         })
     }
-  }
+  }, [encodedImage, isSent, path])
 
-  const mouseLeaveHandler = () => {
+  const mouseLeaveHandler = useCallback(() => {
     setShowPreview(false);
-  }
+  }, []);
 
   return (
     <>
