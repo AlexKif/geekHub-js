@@ -7,17 +7,30 @@ import StructureList from "./StructureList";
 import {API} from "../../api";
 import CreateFolder from "./Modals/CreateFolder";
 import {useDispatch, useSelector} from "react-redux";
-import {removeLastPath, setFile, setFlies, setPath} from "../../slices/fileManager";
+import {removeLastPath, setFile, setFlies, setPath, deleteItem, setFolder} from "../../slices/fileManager";
+import {successNotification} from "../../functions";
+import RenameModal from "./Modals/RenameModal";
 
 const FileManager = () => {
+  const dispatch = useDispatch();
+  const {path} = useSelector((state) => state.fileManager);
+  const inputFile = useRef(null);
+
+  /*Copy and Cut*/
   const [tempData, setTempData] = useState(null);
+  const [fromPath, setFromPath] = useState([]);
+  /*End*/
+
+  /*Context menu*/
   const [contextItems, setContextItems] = useState(['Create folder', 'Upload file']);
   const [contextAction, setContextAction] = useState('');
   const [selectedItem, setSelectedItem] = useState('');
+  /*End*/
+
+  /*Modals*/
   const [createIsOpen, setCreateIsOpen] = useState(false);
-  const dispatch = useDispatch();
-  const {path} = useSelector((state) => state.fileManager);
-  const inputFile = useRef(null)
+  const [renameIsOpen, setRenameIsOpen] = useState(false);
+  /*End*/
 
   useEffect(() => {
     API.getFilesByPath().then(res => {
@@ -25,14 +38,27 @@ const FileManager = () => {
     });
   }, [])
 
-  function handleItemClick({ event }){
-    // console.log(event.currentTarget.id)
+  function handleItemClick({ event }) {
+    setContextAction(event.currentTarget.id)
     switch (event.currentTarget.id) {
       case 'createfolder':
         setCreateIsOpen(true);
         break;
       case 'uploadfile':
         inputFile.current.click();
+        break;
+      case 'delete':
+        deleteHandler();
+        break;
+      case 'cut':
+      case 'copy':
+        moveHandler();
+        break;
+      case 'paste':
+        insertHandler();
+        break;
+      case 'rename':
+        setRenameIsOpen(true);
         break;
     }
   }
@@ -44,18 +70,32 @@ const FileManager = () => {
 
   const contextMenuHandler = (e) => {
     const className = e.target.className
-    if (tempData && e.target.className !== 'files-list__item') {
+    if (tempData && className !== 'files-list__item' && className !== 'files-list__file' && className !== 'files-list__folder') {
       return setContextItems(['Paste'])
     }
     if (className === 'files-list__item' || className === 'files-list__file' || className === 'files-list__folder') {
-      setContextItems(['Copy', 'Cut', 'Delete', 'Rename'])
+      return setContextItems(['Copy', 'Cut', 'Delete', 'Rename'])
     } else {
-      setContextItems(['Create folder', 'Upload file'])
+      return setContextItems(['Create folder', 'Upload file'])
     }
   }
 
+  const moveHandler = () => {
+    setFromPath(path);
+    setTempData(selectedItem);
+  }
+
+  const insertHandler = () => {
+    const action = contextAction === 'cut' ? 'cut': 'copy';
+    API.moveItem(tempData.name, fromPath, path, action).then(res => {
+      setTempData(null);
+      const isFile = res.data[0].type === 'file'
+      dispatch(isFile ? setFile(res.data): setFolder(res.data[0]))
+      successNotification(`${isFile ? 'File': 'Folder'} was ${action === 'cut' ? 'moved': 'copied'}`)
+    });
+  }
+
   const listContextHandler = (item) => {
-    console.log(item)
     setSelectedItem(item)
   }
 
@@ -86,6 +126,16 @@ const FileManager = () => {
     });
   }
 
+  const deleteHandler = () => {
+    API.deleteItem(selectedItem.name, path).then(res => {
+      if (res.status === 200) {
+        dispatch(deleteItem(selectedItem));
+        const isFile = selectedItem.type === 'file'
+        successNotification(`${isFile ? 'File': 'Folder'} was deleted`)
+      }
+    });
+  }
+
   const uploadHandler = (e) => {
     const data = e.target.files
     const files = new FormData();
@@ -110,7 +160,8 @@ const FileManager = () => {
         <StructureList listContextHandler={listContextHandler} listDbClickHandler={listDbClickHandler} goBack={goBack}/>
       </div>
       <CustomContextMenu items={contextItems} onChange={handleItemClick}/>
-      <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} contextAction={contextAction} path={path}/>
+      <CreateFolder showModal={createIsOpen} onClose={setCreateIsOpen} path={path}/>
+      <RenameModal selectedItem={selectedItem} showModal={renameIsOpen} onClose={setRenameIsOpen} path={path}/>
       <input type='file' name="file-uploader" onClick={fileClickHandler} onChange={uploadHandler} id='file' multiple ref={inputFile} style={{display: 'none'}}/>
     </div>
   );

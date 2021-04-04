@@ -28,8 +28,16 @@ const fileManagerSlice = createSlice({
     removeLastPath: (state, action) => {
       state.path.pop();
     },
+    deleteItem: (state, action) => {
+      const index = state.files.findIndex(item => item.id === action.payload.id);
+      state.files.splice(index, 1);
+    },
+    renameItem: (state, action) => {
+      const index = state.files.findIndex(item => item.id === action.payload.id);
+      state.files[index].name = action.payload.name;
+    },
   }
 });
 
-export const { setFolder, setFile, setFlies, setPath, removeLastPath } = fileManagerSlice.actions;
+export const { setFolder, setFile, setFlies, setPath, removeLastPath, deleteItem, renameItem } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;

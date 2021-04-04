@@ -104,4 +104,51 @@ export const API = {
       },
     });
   },
+
+  deleteItem(name, path = []) {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'get',
+      url: `${this.baseUrl}/file-manager/delete/${name}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        path
+      },
+    });
+  },
+
+  moveItem(name, from = [], to = [], action) {
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'get',
+      url: `${this.baseUrl}/file-manager/${action}/${name}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        from,
+        to
+      },
+    });
+  },
+
+  renameItem(path = [], name, newName) {
+    console.log(path, name, newName)
+    const token = localStorage.getItem('token');
+    return axios({
+      method: 'post',
+      url: `${this.baseUrl}/file-manager/rename/${name}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: {
+        newName
+      },
+      params: {
+        path
+      },
+    });
+  },
 }
